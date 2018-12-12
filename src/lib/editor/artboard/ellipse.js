@@ -3,6 +3,7 @@ import React, { PureComponent, Fragment } from 'react';
 import type { Drawable } from '../drawables';
 
 type Props ={|
+  drawingFill: string,
   drawingStroke: string,
   drawingStrokeWidth: number,
   width: number,
@@ -11,35 +12,42 @@ type Props ={|
 |};
 
 type State = {
-  drawingPoints?: ?Array<{ x: number, y: number }>,
+  startCoord?: { x: number, y: number } | null,
+  currentCoord?: { x: number, y: number } | null,
 };
 
-function Path({
-  points,
-  stroke,
-  strokeWidth,
-}: {
-  points: Array<{ x: number, y: number }>,
-  stroke: string,
-  strokeWidth: number,
-}) {
-  return (
-    <path
-      d={`M ${points.map(p => `${p.x} ${p.y}`).join('L')}`}
-      fill="none"
-      strokeWidth={strokeWidth}
-      stroke={stroke}
-    />
-  );
-}
-
-export default class ArtboardPen extends PureComponent<Props, State> {
+export default class ArtboardEllipse extends PureComponent<Props, State> {
   static defaultProps = {
-    drawingStroke: 'black',
-    drawingStrokeWidth: 5,
+    drawingFill: 'black',
+    drawingStroke: 'none',
+    drawingStrokeWidth: 0,
   }
 
   state = {};
+
+  getEllipseBounds = () => {
+    const { startCoord, currentCoord } = this.state;
+
+    if (!startCoord || !currentCoord) {
+      return null;
+    }
+
+    const lowerX = Math.min(startCoord.x, currentCoord.x);
+    const lowerY = Math.min(startCoord.y, currentCoord.y);
+    const higherX = Math.max(startCoord.x, currentCoord.x);
+    const higherY = Math.max(startCoord.y, currentCoord.y);
+    const width = higherX - lowerX;
+    const height = higherY - lowerY;
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+
+    return {
+      cx: lowerX + halfWidth,
+      cy: lowerY + halfHeight,
+      rx: halfWidth,
+      ry: halfHeight,
+    };
+  }
 
   handleArtboardMouseDown = (e: MouseEvent) => {
     const artboard = e.currentTarget;
@@ -67,18 +75,10 @@ export default class ArtboardPen extends PureComponent<Props, State> {
       return { x: pt.x, y: pt.y };
     };
 
-    const initialCoords = transformPoint(e);
-
-    const points = [initialCoords];
-    this.setState({ drawingPoints: points });
+    this.setState({ startCoord: transformPoint(e) });
 
     const mouseMoveHandler = (e2: MouseEvent) => {
-      points.push(transformPoint(e2)); /* convertToLocalCoordinates(
-        artboard,
-        e2.clientX - rect.left,
-        e2.clientY - rect.top,
-      ))); */
-      this.setState({ drawingPoints: points.slice() });
+      this.setState({ currentCoord: transformPoint(e2) });
     };
 
     const mouseUpHandler = () => {
@@ -86,15 +86,20 @@ export default class ArtboardPen extends PureComponent<Props, State> {
       window.removeEventListener('mouseup', mouseUpHandler);
       // TODO: finish drawing...
 
-      const id = String(Date.now());
-      this.props.onDrawEnd({
-        type: 'path',
-        id,
-        points,
-        stroke: this.props.drawingStroke,
-        strokeWidth: this.props.drawingStrokeWidth,
-      });
-      this.setState({ drawingPoints: null });
+      const ellipseBounds = this.getEllipseBounds();
+
+      if (ellipseBounds) {
+        const id = String(Date.now());
+        this.props.onDrawEnd({
+          type: 'ellipse',
+          id,
+          ...ellipseBounds,
+          fill: this.props.drawingFill,
+          stroke: this.props.drawingStroke,
+          strokeWidth: this.props.drawingStrokeWidth,
+        });
+      }
+      this.setState({ startCoord: null, currentCoord: null });
     };
 
     window.addEventListener('mousemove', mouseMoveHandler);
@@ -105,12 +110,12 @@ export default class ArtboardPen extends PureComponent<Props, State> {
     const {
       width,
       height,
+      drawingFill,
       drawingStroke,
       drawingStrokeWidth,
     } = this.props;
-    const {
-      drawingPoints,
-    } = this.state;
+
+    const ellipseBounds = this.getEllipseBounds();
 
     return (
       <Fragment>
@@ -124,10 +129,11 @@ export default class ArtboardPen extends PureComponent<Props, State> {
           width={width}
           height={height}
         />
-        {drawingPoints && (
-          <Path
-            key="path"
-            points={drawingPoints}
+        {ellipseBounds && (
+          <ellipse
+            {...ellipseBounds}
+            key="rect"
+            fill={drawingFill}
             stroke={drawingStroke}
             strokeWidth={drawingStrokeWidth}
           />

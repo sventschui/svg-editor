@@ -6,6 +6,7 @@ import translateDrawable from './drawables/translate';
 import resizeDrawable from './drawables/resize';
 import ArtboardPen from './artboard/pen';
 import ArtboardRect from './artboard/rect';
+import ArtboardEllipse from './artboard/ellipse';
 // import convertToLocalCoordinates from '../util/to-local-coordinates';
 
 type Props = UncontrolledEditorProps & {
@@ -13,7 +14,7 @@ type Props = UncontrolledEditorProps & {
   drawables?: Array<Drawable>,
   onDrawablesChange?: (drawables: Array<Drawable>) => void,
   defaultDrawables?: Array<Drawable>,
-  drawMode: 'pen' | null,
+  drawMode: 'pen' | 'rect' | 'ellipse' | null,
 };
 
 type State = {|
@@ -111,6 +112,9 @@ export default class UncontrolledEditorWithDrawables extends PureComponent<Props
         break;
       case 'rect':
         Artboard = ArtboardRect;
+        break;
+      case 'ellipse':
+        Artboard = ArtboardEllipse;
         break;
       default:
         Artboard = null;

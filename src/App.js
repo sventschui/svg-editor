@@ -68,7 +68,7 @@ export default class App extends PureComponent<{}> {
                 height={source.height}
                 rotate={90}
                 defaultDrawables={defaultDrawables}
-                drawMode="rect"
+                drawMode="ellipse"
                 allowDrag={false}
                 onDrawablesChange={this.handleDrawablesChange}
               />

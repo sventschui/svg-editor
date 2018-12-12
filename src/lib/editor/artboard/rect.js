@@ -16,7 +16,7 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-export default class Artboard extends PureComponent<Props, State> {
+export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
     drawingFill: 'black',
     drawingStroke: 'none',
@@ -108,6 +108,8 @@ export default class Artboard extends PureComponent<Props, State> {
       width,
       height,
       drawingFill,
+      drawingStroke,
+      drawingStrokeWidth,
     } = this.props;
 
     const rectBounds = this.getRectBounds();
@@ -129,6 +131,8 @@ export default class Artboard extends PureComponent<Props, State> {
             {...rectBounds}
             key="rect"
             fill={drawingFill}
+            stroke={drawingStroke}
+            strokeWidth={drawingStrokeWidth}
           />
         )}
       </Fragment>
