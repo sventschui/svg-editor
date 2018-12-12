@@ -54,8 +54,6 @@ type Props = {|
     id: string,
     handleX: 'left' | 'right',
     handleY: 'top' | 'bottom',
-    initialX: number,
-    initialY: number,
     newX: number,
     newY: number,
   ) => void,
@@ -171,8 +169,6 @@ export default class Drawables extends PureComponent<Props> {
       return { x: pt.x, y: pt.y };
     };
 
-    const initialCoords = transformPoint(e);
-
     const mouseMoveHandler = (e2) => {
       const newCoords = transformPoint(e2);
 
@@ -181,8 +177,6 @@ export default class Drawables extends PureComponent<Props> {
         id,
         handleX,
         handleY,
-        initialCoords.x,
-        initialCoords.y,
         newCoords.x,
         newCoords.y,
       );
