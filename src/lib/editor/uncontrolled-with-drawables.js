@@ -4,7 +4,8 @@ import UncontrolledEditor, { type Props as UncontrolledEditorProps } from './unc
 import Drawables, { type Drawable } from './drawables';
 import translateDrawable from './drawables/translate';
 import resizeDrawable from './drawables/resize';
-import Artboard from './artboard';
+import ArtboardPen from './artboard/pen';
+import ArtboardRect from './artboard/rect';
 // import convertToLocalCoordinates from '../util/to-local-coordinates';
 
 type Props = UncontrolledEditorProps & {
@@ -103,6 +104,18 @@ export default class UncontrolledEditorWithDrawables extends PureComponent<Props
     } = this.props;
     const { width, height } = this.props;
 
+    let Artboard;
+    switch (drawMode) {
+      case 'pen':
+        Artboard = ArtboardPen;
+        break;
+      case 'rect':
+        Artboard = ArtboardRect;
+        break;
+      default:
+        Artboard = null;
+    }
+
     return (
       <div>
         <UncontrolledEditor
@@ -121,12 +134,13 @@ export default class UncontrolledEditorWithDrawables extends PureComponent<Props
             onResizeDrawable={this.handleResizeDrawable}
             onDrawableTranslate={this.handleDrawableTranslate}
           />
-          <Artboard
-            width={width}
-            height={height}
-            drawMode={drawMode}
-            onDrawEnd={this.handleDrawEnd}
-          />
+          {Artboard && (
+            <Artboard
+              width={width}
+              height={height}
+              onDrawEnd={this.handleDrawEnd}
+            />
+          )}
         </UncontrolledEditor>
         <pre>{JSON.stringify(this.state, null, 2)}</pre>
         <pre>{JSON.stringify(this.props, null, 2)}</pre>
