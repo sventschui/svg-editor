@@ -86,6 +86,30 @@ export default class App extends PureComponent<{}> {
             }
 
             return (
+              <UncontrolledEditorWithDrawables
+                url={source.url}
+                width={source.width}
+                height={source.height}
+                rotate={90}
+                defaultDrawables={defaultDrawables}
+                drawMode={null}
+                allowDrag={false}
+                onDrawablesChange={this.handleDrawablesChange}
+              />
+            );
+          }}
+        </Source>
+        <Source source="/pdf-test.pdf">
+          {(source) => {
+            if (source.state === 'LOADING') {
+              return (<div>Loading...</div>);
+            }
+
+            if (source.state === 'ERROR') {
+              return (<div>Error...</div>);
+            }
+
+            return (
               <img src={source.url} width={source.width} height={source.height} alt="bla" />
             );
           }}
