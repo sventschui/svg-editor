@@ -157,8 +157,13 @@ export default class UncontrolledEditorWithDrawables extends PureComponent<Props
                 cy: i.cy + y,
               };
             case 'path':
-              console.error('path can not be translated currently', i); // eslint-disable-line no-console
-              return i;
+              return {
+                ...i,
+                points: i.points.map(old => ({
+                  x: old.x + x,
+                  y: old.y + y,
+                })),
+              };
             case 'line':
               return {
                 ...i,
