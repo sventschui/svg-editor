@@ -1,0 +1,11 @@
+{
+  "env": { "browser": true },
+  "extends": ["airbnb", "plugin:flowtype/recommended"],
+  "plugins": ["flowtype"],
+  "rules": {
+    "flowtype/require-valid-file-annotation": [2, "always"],
+    "react/jsx-filename-extension": 0,
+    "react/destructuring-assignment": 0,
+    "react/require-default-props": 0
+  }
+}
