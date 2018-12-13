@@ -2,27 +2,20 @@
   "name": "editor",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "memoize-one": "^4.0.3",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "react-scripts": "2.1.1"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "dependencies": {
+    "memoize-one": "^4.0.3"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
+  "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "pdfjs-dist": "^2.0.0"
+  },
   "devDependencies": {
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-flowtype": "^3.2.0",
@@ -31,6 +24,15 @@
     "eslint-plugin-react": "^7.11.1",
     "flow-bin": "^0.87.0",
     "flow-typed": "^2.5.1",
-    "pdfjs-dist": "^2.0.943"
-  }
+    "pdfjs-dist": "^2.0.943",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-scripts": "2.1.1"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

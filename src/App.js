@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import UncontrolledEditorWithDrawables from './lib/editor/uncontrolled-with-drawables';
 import UncontrolledEditor from './lib/editor/uncontrolled';
 import Source from './lib/source';
+import type { Drawable } from './lib/editor/drawables';
 
 const defaultDrawables = [{
   type: 'rect',
