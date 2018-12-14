@@ -1,42 +1,102 @@
 // @flow
-import React, { PureComponent } from 'react';
-import UncontrolledEditorWithDrawables from './lib/editor/uncontrolled-with-drawables';
-import UncontrolledEditor from './lib/editor/uncontrolled';
-import Source from './lib/source';
-import type { Drawable } from './lib/editor/drawables';
+import React, { PureComponent, Fragment } from 'react';
+import PenIcon from '@material-ui/icons/Edit';
+import DragIcon from '@material-ui/icons/OpenWith';
+import RectIcon from '@material-ui/icons/CropLandscape';
+import EllipseIcon from '@material-ui/icons/PanoramaFishEye';
+import LineIcon from '@material-ui/icons/Remove';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+import RotateRightIcon from '@material-ui/icons/RotateRight';
+import { CompactPicker } from 'react-color';
+import UncontrolledEditor from '../lib/editor/uncontrolled';
+import BackgroundSource from '../lib/background-source';
+import Drawables, { type Drawable } from '../lib/editor/drawables';
+import ArtboardPen from '../lib/editor/artboard/pen';
+import ArtboardRect from '../lib/editor/artboard/rect';
+import ArtboardEllipse from '../lib/editor/artboard/ellipse';
+import ArtboardLine from '../lib/editor/artboard/line';
+import resizeDrawable from '../lib/editor/drawables/resize';
+import translateDrawable from '../lib/editor/drawables/translate';
 
-const defaultDrawables = [{
-  type: 'rect',
-  id: 'rect-1',
-  x: 10,
-  y: 10,
-  width: 20,
-  height: 30,
-  fill: 'red',
-  stroke: 'none',
-  strokeWidth: 0,
-}, {
-  type: 'ellipse',
-  id: 'ellipse-1',
-  cx: 200,
-  cy: 250,
-  rx: 40,
-  ry: 60,
-  fill: 'blue',
-  stroke: 'none',
-  strokeWidth: 0,
-}, {
-  type: 'line',
-  id: 'line-1',
-  x1: 200,
-  x2: 450,
-  y1: 440,
-  y2: 760,
-  stroke: 'green',
-  strokeWidth: 10,
-}];
+type State = {
+  drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line',
+  rotation: 0 | 90 | 180 | 270,
+  strokeColorPickerOpen: boolean,
+  strokeColor: string,
+  strokeWidth: number,
+  fillColorPickerOpen: boolean,
+  fillColor: string,
+  drawables: Array<Drawable>,
+  selectedDrawable: ?string,
+};
 
-export default class App extends PureComponent<{}> {
+const colorStyle = {
+  borderRadius: '3px',
+  margin: '10px',
+  width: '20px',
+};
+
+const iconStyles = {
+  color: 'black',
+  margin: '10px',
+  background: 'transparent',
+  border: 0,
+};
+
+const canvasStyle = {
+  border: '1px solid black',
+  background: 'gray',
+};
+
+const colors = [
+  '#00005b',
+  '#00008f',
+  '#2425aa',
+  '#3032c1',
+  '#3b3fd8',
+  '#494df4',
+  '#000000',
+  '#333333',
+  '#5f5f5f',
+  '#7f7f7f',
+  '#999999',
+  '#e5e5e5',
+  '#f5f5f5',
+  '#fafafa',
+  '#ffffff',
+  '#ff1721',
+  '#f07662',
+  '#ec4d33',
+  '#b5d0ee',
+  '#fad6de',
+  '#9fd9b4',
+  '#f0ff93',
+  '#fcd385',
+  '#9fbeaf',
+  '#668980',
+  '#00adc6',
+  '#027180',
+  '#f1afc6',
+  '#9190ac',
+  '#ddbe65',
+  '#914146',
+  '#1cc54e',
+  '#c91432',
+];
+
+export default class App extends PureComponent<{}, State> {
+  state = {
+    drawMode: null,
+    rotation: 0,
+    strokeColorPickerOpen: false,
+    strokeColor: '#00005b',
+    strokeWidth: 10,
+    fillColorPickerOpen: false,
+    fillColor: '#00008f',
+    drawables: [],
+    selectedDrawable: null,
+  };
+
   renderLoading = () => (
     <div>renderLoading</div>
   );
@@ -45,14 +105,113 @@ export default class App extends PureComponent<{}> {
     <div>renderError</div>
   );
 
-  handleDrawablesChange = (drawables: Array<Drawable>) => {
-    console.log('handleDrawablesChange', drawables);
+  selectDrawMode = (drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line') => () => {
+    this.setState({ drawMode });
+  }
+
+  rotate = (degrees: 90 | -90) => () => {
+    this.setState((state) => {
+      if (degrees >= 0) {
+        return {
+          // $FlowFixMe
+          rotation: (state.rotation + degrees) % 360,
+        };
+      }
+
+      const rotation = state.rotation + degrees;
+      return {
+        // $FlowFixMe
+        rotation: rotation < 0 ? 270 : rotation,
+      };
+    });
+  }
+
+  handleFillColorChange = (e: any) => {
+    this.setState({ fillColor: e.hex });
+  }
+
+  handleStrokeColorChange = (e: any) => {
+    this.setState({ strokeColor: e.hex });
+  }
+
+  toggleFillColorPicker = () => {
+    this.setState(state => ({ fillColorPickerOpen: !state.fillColorPickerOpen }));
+  }
+
+  toggleStrokeColorPicker = () => {
+    this.setState(state => ({ strokeColorPickerOpen: !state.strokeColorPickerOpen }));
+  }
+
+  handleStrokeWidthChange = (e: Event) => {
+    // $FlowFixMe
+    this.setState({ strokeWidth: e.target.value });
+  }
+
+  handleSelectDrawable = (selectedDrawable: string) => {
+    this.setState({ selectedDrawable });
+  }
+
+  handleDrawEnd = (drawable: Drawable) => {
+    this.setState(state => ({
+      drawables: [...state.drawables, drawable],
+    }));
+  }
+
+  handleDragStart = () => {
+    this.setState({ selectedDrawable: null });
+  }
+
+  handleResizeDrawable = (
+    e: MouseEvent,
+    id: string,
+    handleX: 'left' | 'right',
+    handleY: 'top' | 'bottom',
+    newX: number,
+    newY: number,
+  ) => {
+    this.setState(state => ({
+      drawables: state.drawables.map((item) => {
+        if (item.id === id) {
+          return resizeDrawable(item, handleX, handleY, newX, newY);
+        }
+
+        return item;
+      }),
+    }));
+  }
+
+  handleDrawableTranslate = (id: string, x: number, y: number) => {
+    this.setState(state => ({
+      drawables: state.drawables.map((i) => {
+        if (i.id === id) {
+          return translateDrawable(i, x, y);
+        }
+
+        return i;
+      }),
+    }));
+  }
+
+  handleDrawEnd = (drawable: Drawable) => {
+    this.setState((state) => {
+      const drawables = [...state.drawables, drawable];
+
+      return {
+        drawables,
+      };
+    });
+  }
+
+  pdfjs = async () => {
+    const pdfjs = (await import('pdfjs-dist')).default;
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    return pdfjs;
   }
 
   render() {
     return (
       <div>
-        <Source source="/pdf-test.pdf">
+        <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs}>
           {(source) => {
             if (source.state === 'LOADING') {
               return (<div>Loading...</div>);
@@ -62,103 +221,112 @@ export default class App extends PureComponent<{}> {
               return (<div>Error...</div>);
             }
 
-            return (
-              <UncontrolledEditorWithDrawables
-                url={source.url}
-                width={source.width}
-                height={source.height}
-                rotate={90}
-                defaultDrawables={defaultDrawables}
-                drawMode="ellipse"
-                allowDrag={false}
-                onDrawablesChange={this.handleDrawablesChange}
-              />
-            );
-          }}
-        </Source>
-        <Source source="/pdf-test.pdf">
-          {(source) => {
-            if (source.state === 'LOADING') {
-              return (<div>Loading...</div>);
-            }
+            const {
+              drawMode,
+              rotation,
+              fillColor,
+              fillColorPickerOpen,
+              strokeColor,
+              strokeWidth,
+              strokeColorPickerOpen,
+              drawables,
+              selectedDrawable,
+            } = this.state;
 
-            if (source.state === 'ERROR') {
-              return (<div>Error...</div>);
-            }
-
-            return (
-              <UncontrolledEditorWithDrawables
-                url={source.url}
-                width={source.width}
-                height={source.height}
-                rotate={90}
-                defaultDrawables={defaultDrawables}
-                drawMode={null}
-                allowDrag={false}
-                onDrawablesChange={this.handleDrawablesChange}
-              />
-            );
-          }}
-        </Source>
-        <Source source="/pdf-test.pdf">
-          {(source) => {
-            if (source.state === 'LOADING') {
-              return (<div>Loading...</div>);
-            }
-
-            if (source.state === 'ERROR') {
-              return (<div>Error...</div>);
+            let Artboard;
+            switch (drawMode) {
+              case 'pen':
+                Artboard = ArtboardPen;
+                break;
+              case 'rect':
+                Artboard = ArtboardRect;
+                break;
+              case 'ellipse':
+                Artboard = ArtboardEllipse;
+                break;
+              case 'line':
+                Artboard = ArtboardLine;
+                break;
+              default:
+                Artboard = null;
             }
 
             return (
-              <img src={source.url} width={source.width} height={source.height} alt="bla" />
+              <div>
+                <div style={{ display: 'flex' }}>
+                  {
+                    drawMode != null && (
+                      <Fragment>
+                        {(drawMode === 'rect' || drawMode === 'ellipse') && (
+                          <Fragment key="fill">
+                            <button
+                              type="button"
+                              key="fillColor"
+                              style={{ ...colorStyle, backgroundColor: fillColor }}
+                              onClick={this.toggleFillColorPicker}
+                            />
+                            {fillColorPickerOpen && (
+                              <CompactPicker key="fillColorPicker" colors={colors} onChange={this.handleFillColorChange} />
+                            )}
+                          </Fragment>
+                        )}
+                        <input key="strokeWidth" type="number" value={strokeWidth} onChange={this.handleStrokeWidthChange} />
+                        <button
+                          type="button"
+                          key="strokeColor"
+                          style={{ ...colorStyle, backgroundColor: strokeColor }}
+                          onClick={this.toggleStrokeColorPicker}
+                        />
+                        {strokeColorPickerOpen && (
+                          <CompactPicker key="strokeColorPicker" colors={colors} onChange={this.handleStrokeColorChange} />
+                        )}
+                        <span key="spacer" style={{ margin: '10px', borderRight: '1px solid #333' }} />
+                      </Fragment>
+                    )
+                  }
+                  <DragIcon style={{ ...iconStyles, color: drawMode === null ? 'blue' : 'black' }} onClick={this.selectDrawMode(null)} />
+                  <PenIcon style={{ ...iconStyles, color: drawMode === 'pen' ? 'blue' : 'black' }} onClick={this.selectDrawMode('pen')} />
+                  <RectIcon style={{ ...iconStyles, color: drawMode === 'rect' ? 'blue' : 'black' }} onClick={this.selectDrawMode('rect')} />
+                  <EllipseIcon style={{ ...iconStyles, color: drawMode === 'ellipse' ? 'blue' : 'black' }} onClick={this.selectDrawMode('ellipse')} />
+                  <LineIcon style={{ ...iconStyles, color: drawMode === 'line' ? 'blue' : 'black' }} onClick={this.selectDrawMode('line')} />
+                  <span style={{ margin: '10px', borderRight: '1px solid #333' }} />
+                  <RotateLeftIcon style={iconStyles} onClick={this.rotate(-90)} />
+                  <RotateRightIcon style={iconStyles} onClick={this.rotate(90)} />
+                </div>
+                <UncontrolledEditor
+                  allowDrag={drawMode === null}
+                  backgroundUrl={source.url}
+                  width={source.width}
+                  height={source.height}
+                  rotate={rotation}
+                  canvasSytle={canvasStyle}
+                >
+                  <Drawables
+                    width={source.width}
+                    height={source.height}
+                    drawables={drawables}
+                    onSelectDrawable={this.handleSelectDrawable}
+                    canSelectDrawable={drawMode === null}
+                    selectedDrawable={selectedDrawable}
+                    onResizeDrawable={this.handleResizeDrawable}
+                    onDrawableTranslate={this.handleDrawableTranslate}
+                  />
+                  {Artboard && (
+                    // $FlowFixMe
+                    <Artboard
+                      width={source.width}
+                      height={source.height}
+                      onDrawEnd={this.handleDrawEnd}
+                      drawingFill={fillColor}
+                      drawingStroke={strokeColor}
+                      drawingStrokeWidth={strokeWidth}
+                    />
+                  )}
+                </UncontrolledEditor>
+              </div>
             );
           }}
-        </Source>
-        <Source source="/png-test.png">
-          {(source) => {
-            if (source.state === 'LOADING') {
-              return (<div>Loading...</div>);
-            }
-
-            if (source.state === 'ERROR') {
-              return (<div>Error...</div>);
-            }
-
-            return (
-              <UncontrolledEditor
-                url={source.url}
-                width={source.width}
-                height={source.height}
-                rotate={0}
-                allowDrag={false}
-              />
-            );
-          }}
-        </Source>
-        <Source source="/png-test.png">
-          {(source) => {
-            if (source.state === 'LOADING') {
-              return (<div>Loading...</div>);
-            }
-
-            if (source.state === 'ERROR') {
-              return (<div>Error...</div>);
-            }
-
-            return (
-              <img src={source.url} width={source.width} height={source.height} alt="bla" />
-            );
-          }}
-        </Source>
-        <style>
-          {`
-            svg {
-              border: 1px solid black;
-              background: gray;
-            }
-          `}
-        </style>
+        </BackgroundSource>
       </div>
     );
   }

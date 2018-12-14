@@ -1,7 +1,6 @@
 {
-  "name": "editor",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@sventschui/react-svg-editor",
+  "version": "1.0.0-alpha.1",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -12,11 +11,13 @@
     "memoize-one": "^4.0.3"
   },
   "peerDependencies": {
+    "pdfjs-dist": "^2.0.0",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "pdfjs-dist": "^2.0.0"
+    "react-dom": "^16.0.0"
   },
   "devDependencies": {
+    "@material-ui/core": "^3.6.2",
+    "@material-ui/icons": "^3.0.1",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-flowtype": "^3.2.0",
     "eslint-plugin-import": "^2.14.0",
@@ -26,7 +27,9 @@
     "flow-typed": "^2.5.1",
     "pdfjs-dist": "^2.0.943",
     "react": "^16.6.3",
+    "react-color": "^2.14.1",
     "react-dom": "^16.6.3",
+    "react-material-icons": "^1.0.3",
     "react-scripts": "2.1.1"
   },
   "browserslist": [
