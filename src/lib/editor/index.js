@@ -257,43 +257,41 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
     }
 
     return (
-      <div style={{ width: '75vw', height: '75vh', margin: '8vh' }}>
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          width="100%"
-          height="100%"
-          onMouseDown={this.svgMouseDownHandler}
-          onWheel={this.handleWheel}
-          style={canvasSytle}
-          className={canvasClassName}
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        width="100%"
+        height="100%"
+        onMouseDown={this.svgMouseDownHandler}
+        onWheel={this.handleWheel}
+        style={canvasSytle}
+        className={canvasClassName}
+      >
+        {/* invisible rect to determine actual width/height and convert
+          stuff to viewBox coordinates */}
+        <rect
+          x="0"
+          y="0"
+          width={`${width}`}
+          height={`${height}`}
+          ref={this.referenceRectNoZoom}
+          fill="none"
+        />
+        {/* the zoomable part of the svg */}
+        <g
+          style={this.makeZoomAndTranslateStyles(
+            zoom,
+            imageWidth,
+            imageHeight,
+            translateX,
+            translateY,
+            rotate,
+          )}
         >
-          {/* invisible rect to determine actual width/height and convert
-            stuff to viewBox coordinates */}
-          <rect
-            x="0"
-            y="0"
-            width={`${width}`}
-            height={`${height}`}
-            ref={this.referenceRectNoZoom}
-            fill="none"
-          />
-          {/* the zoomable part of the svg */}
-          <g
-            style={this.makeZoomAndTranslateStyles(
-              zoom,
-              imageWidth,
-              imageHeight,
-              translateX,
-              translateY,
-              rotate,
-            )}
-          >
-            {/* The canvas (aka artboard) */}
-            <image xlinkHref={backgroundUrl} x="0" y="0" height={`${imageHeight}`} width={`${imageWidth}`} />
-            {this.props.children}
-          </g>
-        </svg>
-      </div>
+          {/* The canvas (aka artboard) */}
+          <image xlinkHref={backgroundUrl} x="0" y="0" height={`${imageHeight}`} width={`${imageWidth}`} />
+          {this.props.children}
+        </g>
+      </svg>
     );
   }
 }
