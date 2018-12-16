@@ -8,15 +8,15 @@ import LineIcon from '@material-ui/icons/Remove';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
 import { CompactPicker } from 'react-color';
-import UncontrolledEditor from '../lib/editor/uncontrolled';
-import BackgroundSource from '../lib/background-source';
-import Drawables, { type Drawable } from '../lib/editor/drawables';
-import ArtboardPen from '../lib/editor/artboard/pen';
-import ArtboardRect from '../lib/editor/artboard/rect';
-import ArtboardEllipse from '../lib/editor/artboard/ellipse';
-import ArtboardLine from '../lib/editor/artboard/line';
-import resizeDrawable from '../lib/editor/drawables/resize';
-import translateDrawable from '../lib/editor/drawables/translate';
+import UncontrolledEditor from './lib/editor/uncontrolled';
+import BackgroundSource from './lib/background-source';
+import Drawables, { type Drawable } from './lib/editor/drawables';
+import ArtboardPen from './lib/editor/artboard/pen';
+import ArtboardRect from './lib/editor/artboard/rect';
+import ArtboardEllipse from './lib/editor/artboard/ellipse';
+import ArtboardLine from './lib/editor/artboard/line';
+import resizeDrawable from './lib/editor/drawables/resize';
+import translateDrawable from './lib/editor/drawables/translate';
 
 type State = {
   drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line',

@@ -18,7 +18,9 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-export default class ArtboardEllipse extends PureComponent<Props, State> {
+const artboardStyles = { pointerEvents: 'bounding-box' };
+
+export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
     drawingFill: 'black',
     drawingStroke: 'none',
@@ -29,7 +31,7 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
 
   state = {};
 
-  getEllipseBounds = () => {
+  getRectBounds = () => {
     const { startCoord, currentCoord } = this.state;
 
     if (!startCoord || !currentCoord) {
@@ -40,20 +42,19 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
     const lowerY = Math.min(startCoord.y, currentCoord.y);
     const higherX = Math.max(startCoord.x, currentCoord.x);
     const higherY = Math.max(startCoord.y, currentCoord.y);
+
     const width = higherX - lowerX;
     const height = higherY - lowerY;
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
 
     if (width < this.props.minWidth && height < this.props.minHeight) {
       return null;
     }
 
     return {
-      cx: lowerX + halfWidth,
-      cy: lowerY + halfHeight,
-      rx: halfWidth,
-      ry: halfHeight,
+      x: lowerX,
+      y: lowerY,
+      width,
+      height,
     };
   }
 
@@ -92,16 +93,15 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
     const mouseUpHandler = () => {
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
-      // TODO: finish drawing...
 
-      const ellipseBounds = this.getEllipseBounds();
+      const rectBounds = this.getRectBounds();
 
-      if (ellipseBounds) {
+      if (rectBounds) {
         const id = String(Date.now());
         this.props.onDrawEnd({
-          type: 'ellipse',
+          type: 'rect',
           id,
-          ...ellipseBounds,
+          ...rectBounds,
           fill: this.props.drawingFill,
           stroke: this.props.drawingStroke,
           strokeWidth: this.props.drawingStrokeWidth,
@@ -123,12 +123,12 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
       drawingStrokeWidth,
     } = this.props;
 
-    const ellipseBounds = this.getEllipseBounds();
+    const rectBounds = this.getRectBounds();
 
     return (
       <Fragment>
         <rect
-          style={{ pointerEvents: 'bounding-box' }}
+          style={artboardStyles}
           key="artboard"
           fill="none"
           onMouseDown={this.handleArtboardMouseDown}
@@ -137,10 +137,9 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
           width={width}
           height={height}
         />
-        {ellipseBounds && (
-          <ellipse
-            {...ellipseBounds}
-            key="rect"
+        {rectBounds && (
+          <rect
+            {...rectBounds}
             fill={drawingFill}
             stroke={drawingStroke}
             strokeWidth={drawingStrokeWidth}

@@ -8,38 +8,53 @@ type Props ={|
   width: number,
   height: number,
   onDrawEnd: (drawable: Drawable) => void,
+  minWidth: number,
+  minHeight: number,
 |};
 
 type State = {
-  drawingPoints?: ?Array<{ x: number, y: number }>,
+  startCoord?: { x: number, y: number } | null,
+  currentCoord?: { x: number, y: number } | null,
 };
 
-function Path({
-  points,
-  stroke,
-  strokeWidth,
-}: {
-  points: Array<{ x: number, y: number }>,
-  stroke: string,
-  strokeWidth: number,
-}) {
-  return (
-    <path
-      d={`M ${points.map(p => `${p.x} ${p.y}`).join('L')}`}
-      fill="none"
-      strokeWidth={strokeWidth}
-      stroke={stroke}
-    />
-  );
-}
+const artboardStyles = { pointerEvents: 'bounding-box' };
 
-export default class ArtboardPen extends PureComponent<Props, State> {
+export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
     drawingStroke: 'black',
     drawingStrokeWidth: 5,
+    minWidth: 10,
+    minHeight: 10,
   }
 
   state = {};
+
+  getLinePoints = () => {
+    const { startCoord, currentCoord } = this.state;
+
+    if (!startCoord || !currentCoord) {
+      return null;
+    }
+
+    const lowerX = Math.min(startCoord.x, currentCoord.x);
+    const lowerY = Math.min(startCoord.y, currentCoord.y);
+    const higherX = Math.max(startCoord.x, currentCoord.x);
+    const higherY = Math.max(startCoord.y, currentCoord.y);
+
+    const width = higherX - lowerX;
+    const height = higherY - lowerY;
+
+    if (width < this.props.minWidth && height < this.props.minHeight) {
+      return null;
+    }
+
+    return {
+      x1: startCoord.x,
+      y1: startCoord.y,
+      x2: currentCoord.x,
+      y2: currentCoord.y,
+    };
+  }
 
   handleArtboardMouseDown = (e: MouseEvent) => {
     const artboard = e.currentTarget;
@@ -67,30 +82,29 @@ export default class ArtboardPen extends PureComponent<Props, State> {
       return { x: pt.x, y: pt.y };
     };
 
-    const initialCoords = transformPoint(e);
-
-    const points = [initialCoords];
-    this.setState({ drawingPoints: points });
+    this.setState({ startCoord: transformPoint(e) });
 
     const mouseMoveHandler = (e2: MouseEvent) => {
-      points.push(transformPoint(e2));
-      this.setState({ drawingPoints: points.slice() });
+      this.setState({ currentCoord: transformPoint(e2) });
     };
 
     const mouseUpHandler = () => {
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
-      // TODO: finish drawing...
 
-      const id = String(Date.now());
-      this.props.onDrawEnd({
-        type: 'path',
-        id,
-        points,
-        stroke: this.props.drawingStroke,
-        strokeWidth: this.props.drawingStrokeWidth,
-      });
-      this.setState({ drawingPoints: null });
+      const points = this.getLinePoints();
+
+      if (points) {
+        const id = String(Date.now());
+        this.props.onDrawEnd({
+          type: 'line',
+          id,
+          ...points,
+          stroke: this.props.drawingStroke,
+          strokeWidth: this.props.drawingStrokeWidth,
+        });
+      }
+      this.setState({ startCoord: null, currentCoord: null });
     };
 
     window.addEventListener('mousemove', mouseMoveHandler);
@@ -104,14 +118,13 @@ export default class ArtboardPen extends PureComponent<Props, State> {
       drawingStroke,
       drawingStrokeWidth,
     } = this.props;
-    const {
-      drawingPoints,
-    } = this.state;
+
+    const points = this.getLinePoints();
 
     return (
       <Fragment>
         <rect
-          style={{ pointerEvents: 'bounding-box' }}
+          style={artboardStyles}
           key="artboard"
           fill="none"
           onMouseDown={this.handleArtboardMouseDown}
@@ -120,10 +133,9 @@ export default class ArtboardPen extends PureComponent<Props, State> {
           width={width}
           height={height}
         />
-        {drawingPoints && (
-          <Path
-            key="path"
-            points={drawingPoints}
+        {points && (
+          <line
+            {...points}
             stroke={drawingStroke}
             strokeWidth={drawingStrokeWidth}
           />
