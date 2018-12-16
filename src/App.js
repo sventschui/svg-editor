@@ -211,7 +211,7 @@ export default class App extends PureComponent<{}, State> {
   render() {
     return (
       <div>
-        <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs}>
+        <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs} hqPdf>
           {(source) => {
             if (source.state === 'LOADING') {
               return (<div>Loading...</div>);

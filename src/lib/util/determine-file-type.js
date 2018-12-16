@@ -20,17 +20,20 @@ const fileTypes: { [key: string]: FileType } = {
   '25504446': { type: 'pdf', mimeType: 'application/pdf' }, // eslint-disable-line quote-props
 };
 
-export default async function determineFileType(blob: Blob): Promise<FileType | typeof undefined> {
-  const uint = new Uint8Array(await readBytes(blob, 4));
+export default function determineFileType(blob: Blob): Promise<FileType | typeof undefined> {
+  return readBytes(blob, 4)
+    .then((b) => {
+      const uint = new Uint8Array(b);
 
-  const bytes = [];
+      const bytes = [];
 
-  // Array.from is needed for IE compatibility
-  Array.from(uint).forEach((byte) => {
-    bytes.push(byte.toString(16));
-  });
+      // Array.from is needed for IE compatibility
+      Array.from(uint).forEach((byte) => {
+        bytes.push(byte.toString(16));
+      });
 
-  const hex = bytes.join('').toUpperCase();
+      const hex = bytes.join('').toUpperCase();
 
-  return fileTypes[hex];
+      return fileTypes[hex];
+    });
 }
