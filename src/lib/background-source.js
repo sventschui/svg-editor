@@ -43,9 +43,8 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
     fetcher: defaultFetcher,
   }
 
-  constructor(props: Props) {
-    super(props);
-    this.updateSource(props.source, props.source);
+  componentDidMount() {
+    this.updateSource(this.props.source, this.props.source);
   }
 
   componentDidUpdate(prevProps: Props) {
