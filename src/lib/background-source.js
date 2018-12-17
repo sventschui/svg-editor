@@ -61,6 +61,8 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
     }
 
     if (typeof source === 'string') {
+      this.setState({ source: { state: 'LOADING' } });
+
       return this.props.fetcher(source)
         .then(
           (blob) => {
@@ -79,6 +81,8 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
     }
 
     if (source instanceof Blob || source instanceof File) {
+      this.setState({ source: { state: 'LOADING' } });
+
       const blobSource = source;
       return determineFileType(source)
         .then(
@@ -206,46 +210,44 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
     }
 
     return this.props.pdfjs()
-      .then((pdfjs) => {
-        pdfjs.getDocument(URL.createObjectURL(blob))
-          // TODO: validate that there is only one page...
-          .then(doc => doc.getPage(1))
-          .then((page) => {
-            const viewport = page.getViewport(zoom, 0);
+      .then(pdfjs => pdfjs.getDocument(URL.createObjectURL(blob))
+        // TODO: validate that there is only one page...
+        .then(doc => doc.getPage(1))
+        .then((page) => {
+          const viewport = page.getViewport(zoom, 0);
 
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
 
-            const renderContext = {
-              canvasContext: context,
-              viewport,
-            };
+          const renderContext = {
+            canvasContext: context,
+            viewport,
+          };
 
-            return page.render(renderContext)
-              .then(() => {
-                let png;
+          return page.render(renderContext)
+            .then(() => {
+              let png;
 
-                const height = viewport.height / zoom;
-                const width = viewport.width / zoom;
+              const height = viewport.height / zoom;
+              const width = viewport.width / zoom;
 
-                if (canvas.toBlob) {
-                  return new Promise(res => canvas.toBlob(res))
-                    .then((b) => {
-                      png = (URL || window.webkitURL).createObjectURL(b);
-                      return { png, width, height };
-                    });
-                }
+              if (canvas.toBlob) {
+                return new Promise(res => canvas.toBlob(res))
+                  .then((b) => {
+                    png = (URL || window.webkitURL).createObjectURL(b);
+                    return { png, width, height };
+                  });
+              }
 
-                return {
-                  png: canvas.toDataURL(),
-                  width,
-                  height,
-                };
-              });
-          });
-      });
+              return {
+                png: canvas.toDataURL(),
+                width,
+                height,
+              };
+            });
+        }));
   }
 
   render() {
