@@ -55,7 +55,7 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
 
   // eslint-disable-next-line consistent-return
   updateSource = (source: Source, initialSource: Source) => {
-    if (source instanceof URL) {
+    if (typeof window !== 'undefined' && source instanceof window.URL) {
       return this.updateSource(source.toString(), initialSource);
     }
 
