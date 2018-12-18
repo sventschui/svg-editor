@@ -138,6 +138,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
         return { x: pt.x, y: pt.y };
       };
 
+      e.preventDefault();
       e.stopPropagation();
 
       if (this.props.onDragStart) {
