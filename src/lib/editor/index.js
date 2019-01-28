@@ -229,7 +229,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       this.props.maxZoom || 4,
       Math.max(
         this.props.minZoom || 1,
-        this.props.zoom + (e.deltaY / 100),
+        this.props.zoom - (e.deltaY / 100),
       ),
     ));
   };
