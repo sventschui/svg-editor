@@ -49,6 +49,7 @@ type Props = {|
   selectedDrawable?: ?string,
   onSelectDrawable: (id: string) => void,
   onDrawableTranslate: (id: string, x: number, y: number) => void,
+  onRemoveDrawable: (id: string) => void,
   onResizeDrawable: (
     e: MouseEvent,
     id: string,
@@ -152,6 +153,11 @@ export default class Drawables extends PureComponent<Props, State> {
     this.props.onSelectDrawable(id);
   };
 
+  handleRemoveDrawable = (e: MouseEvent, id: string) => {
+    e.stopPropagation();
+    this.props.onRemoveDrawable(id);
+  };
+
   handleResizeHandleMouseDown = (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => {
     if (!this.props.canSelectDrawable) {
       return;
@@ -243,6 +249,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'line':
@@ -261,6 +268,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'path':
@@ -275,6 +283,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onSelect={this.handleDrawableSelect}
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'rect':
@@ -294,6 +303,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             default:

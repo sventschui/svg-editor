@@ -11,6 +11,7 @@ type Props = {|
   onSelect: (e: MouseEvent, id: string) => void,
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
+  onRemoveDrawable: (e: MouseEvent, id: string) => void,
 |};
 
 export default class PathDrawable extends PureComponent<Props> {
@@ -21,6 +22,8 @@ export default class PathDrawable extends PureComponent<Props> {
   handleDragIndicatorMouseDown = (e: MouseEvent) => {
     this.props.onDragIndicatorMouseDown(e, this.props.id);
   };
+
+  handleRemoveDrawable = (e: MouseEvent) => this.props.onRemoveDrawable(e, this.props.id);
 
   render() {
     const {
@@ -70,6 +73,7 @@ export default class PathDrawable extends PureComponent<Props> {
           diHeight={diHeight}
           diStrokeWidth={diStrokeWidth}
           selected={selected}
+          onRemoveDrawable={this.handleRemoveDrawable}
         />
       </g>
     );

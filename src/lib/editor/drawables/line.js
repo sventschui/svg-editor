@@ -15,6 +15,7 @@ type Props = {|
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
   onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
+  onRemoveDrawable: (e: MouseEvent, id: string) => void,
 |};
 
 export default class LineDrawable extends PureComponent<Props> {
@@ -29,6 +30,8 @@ export default class LineDrawable extends PureComponent<Props> {
   handleDragIndicatorMouseDown = (e: MouseEvent) => {
     this.props.onDragIndicatorMouseDown(e, this.props.id);
   };
+
+  handleRemoveDrawable = (e: MouseEvent) => this.props.onRemoveDrawable(e, this.props.id);
 
   render() {
     const {

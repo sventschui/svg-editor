@@ -180,6 +180,10 @@ export default class App extends PureComponent<{}, State> {
     }));
   }
 
+  handleRemoveDrawable = (removedDrawable: string) => {
+    console.log('remove', removedDrawable);
+  }
+
   handleDrawableTranslate = (id: string, x: number, y: number) => {
     this.setState(state => ({
       drawables: state.drawables.map((i) => {
