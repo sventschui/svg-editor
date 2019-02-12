@@ -4,6 +4,7 @@ import DragIndicator from './drag-indicator';
 
 type Props = {|
   id: string,
+  rotate: 0 | 90 | 180 | 270,
   x1: number,
   x2: number,
   y1: number,
@@ -44,6 +45,7 @@ export default class LineDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      rotate,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -66,6 +68,7 @@ export default class LineDrawable extends PureComponent<Props> {
         <line x1={x1} x2={x2} y1={y1} y2={y2} stroke={stroke} strokeWidth={strokeWidth} />
         <DragIndicator
           id={id}
+          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}

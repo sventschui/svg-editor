@@ -13,7 +13,7 @@ export type Props = {
   zoom: number,
   translateX: number,
   translateY: number,
-  rotate: 0 | 90 | 180 | 270;
+  rotate: 0 | 90 | 180 | 270,
   onZoom: (newZoom: number) => void,
   minZoom?: number,
   maxZoom?: number,

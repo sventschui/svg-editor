@@ -4,6 +4,7 @@ import DragIndicator from './drag-indicator';
 
 type Props = {|
   id: string,
+  rotate: 0 | 90 | 180 | 270,
   points: Array<{ x: number, y: number }>,
   stroke: string,
   strokeWidth: number,
@@ -33,6 +34,7 @@ export default class PathDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      rotate,
     } = this.props;
 
     // guard against corrupt data
@@ -66,6 +68,7 @@ export default class PathDrawable extends PureComponent<Props> {
         />
         <DragIndicator
           id={id}
+          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           diX={diX}
           diY={diY}

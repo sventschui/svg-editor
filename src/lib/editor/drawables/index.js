@@ -45,6 +45,7 @@ export type Drawable = {
 type Props = {|
   height: number,
   width: number,
+  rotate: 0 | 90 | 180 | 270,
   canSelectDrawable: boolean,
   selectedDrawable?: ?string,
   onSelectDrawable: (id: string) => void,
@@ -215,7 +216,12 @@ export default class Drawables extends PureComponent<Props, State> {
   }
 
   render() {
-    const { height, width, selectedDrawable } = this.props;
+    const {
+      height,
+      width,
+      selectedDrawable,
+      rotate,
+    } = this.props;
     const { diStrokeWidth } = this.state;
 
     return (
@@ -237,6 +243,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <EllipseDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   cx={item.cx}
                   cy={item.cy}
                   rx={item.rx}
@@ -257,6 +264,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <LineDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   x1={item.x1}
                   x2={item.x2}
                   y1={item.y1}
@@ -276,6 +284,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <PathDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   points={item.points}
                   stroke={item.stroke}
                   strokeWidth={item.strokeWidth}
@@ -291,6 +300,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <RectDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   x={item.x}
                   y={item.y}
                   width={item.width}

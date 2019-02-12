@@ -4,6 +4,7 @@ import DragIndicator from './drag-indicator';
 
 type Props = {|
   id: string,
+  rotate: 0 | 90 | 180 | 270,
   cx: number,
   cy: number,
   rx: number,
@@ -50,6 +51,7 @@ export default class EllipseDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      rotate,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -76,6 +78,7 @@ export default class EllipseDrawable extends PureComponent<Props> {
         />
         <DragIndicator
           id={id}
+          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}

@@ -8,6 +8,7 @@ type Props = {|
   y: number,
   width: number,
   height: number,
+  rotate: 0 | 90 | 180 | 270,
   fill: string,
   stroke: string,
   strokeWidth: number,
@@ -50,6 +51,7 @@ export default class RectDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      rotate,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -76,6 +78,7 @@ export default class RectDrawable extends PureComponent<Props> {
         />
         <DragIndicator
           id={id}
+          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}

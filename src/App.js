@@ -181,7 +181,9 @@ export default class App extends PureComponent<{}, State> {
   }
 
   handleRemoveDrawable = (removedDrawable: string) => {
-    console.log('remove', removedDrawable);
+    this.setState(state => ({
+      drawables: state.drawables.filter(item => item.id !== removedDrawable),
+    }));
   }
 
   handleDrawableTranslate = (id: string, x: number, y: number) => {
@@ -306,6 +308,7 @@ export default class App extends PureComponent<{}, State> {
                   canvasSytle={canvasStyle}
                 >
                   <Drawables
+                    rotate={rotation}
                     width={source.width}
                     height={source.height}
                     drawables={drawables}
@@ -314,6 +317,7 @@ export default class App extends PureComponent<{}, State> {
                     selectedDrawable={selectedDrawable}
                     onResizeDrawable={this.handleResizeDrawable}
                     onDrawableTranslate={this.handleDrawableTranslate}
+                    onRemoveDrawable={this.handleRemoveDrawable}
                   />
                   {Artboard && (
                     // $FlowFixMe
