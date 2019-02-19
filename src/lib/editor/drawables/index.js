@@ -50,8 +50,17 @@ type Props = {|
   selectedDrawable?: ?string,
   onSelectDrawable: (id: string) => void,
   onDrawableTranslate: (id: string, x: number, y: number) => void,
-  onRemoveDrawable: (id: string) => void,
+  onDrawableTranslateEnd?: (id: string, x: number, y: number) => void,
+  onRemoveDrawable?: (id: string) => void,
   onResizeDrawable: (
+    e: MouseEvent,
+    id: string,
+    handleX: 'left' | 'right',
+    handleY: 'top' | 'bottom',
+    newX: number,
+    newY: number,
+  ) => void,
+  onResizeDrawableEnd?: (
     e: MouseEvent,
     id: string,
     handleX: 'left' | 'right',
@@ -136,7 +145,18 @@ export default class Drawables extends PureComponent<Props, State> {
       lastCoords = currentCoords;
     };
 
-    const mouseUpHandler = () => {
+    const { onDrawableTranslateEnd } = this.props;
+
+    const mouseUpHandler = (e3: MouseEvent) => {
+      const currentCoords = transformPoint(e3);
+      if (onDrawableTranslateEnd) {
+        onDrawableTranslateEnd(
+          id,
+          currentCoords.x - lastCoords.x,
+          currentCoords.y - lastCoords.y,
+        );
+      }
+
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
     };
@@ -156,7 +176,10 @@ export default class Drawables extends PureComponent<Props, State> {
 
   handleRemoveDrawable = (e: MouseEvent, id: string) => {
     e.stopPropagation();
-    this.props.onRemoveDrawable(id);
+
+    if (this.props.onRemoveDrawable) {
+      this.props.onRemoveDrawable(id);
+    }
   };
 
   handleResizeHandleMouseDown = (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => {
@@ -206,7 +229,22 @@ export default class Drawables extends PureComponent<Props, State> {
       );
     };
 
-    const mouseUpHandler = () => {
+
+    const { onResizeDrawableEnd } = this.props;
+
+    const mouseUpHandler = (e3: MouseEvent) => {
+      const newCoords = transformPoint(e3);
+      if (onResizeDrawableEnd) {
+        onResizeDrawableEnd(
+          e,
+          id,
+          handleX,
+          handleY,
+          newCoords.x,
+          newCoords.y,
+        );
+      }
+
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
     };

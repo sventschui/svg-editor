@@ -30,12 +30,13 @@ export default class DragIndicator extends PureComponent<Props> {
     stroke: selected ? '#999999' : 'none',
     strokeWidth,
     strokeDasharray: `${strokeWidth * 2} ${strokeWidth}`,
+    animation: 'dash 5s linear forwards infinite',
     // TODO: make stroke dashed
   }));
 
   makeResizHandleStyles = memoize((selected: boolean) => ({
     pointerEvents: 'bounding-box',
-    fill: selected ? '#7f7f7f' : 'none',
+    fill: selected ? '#3b3fd8' : 'none',
     stroke: 'none',
   }));
 
@@ -47,14 +48,15 @@ export default class DragIndicator extends PureComponent<Props> {
       diRight: number,
       diLeft: number,
     ) => {
-      const newDiTop = diTop - 4;
-      const newDiBottom = diBottom + 4;
-      const newDiLeft = diLeft - 4;
-      const newDiRight = diRight + 4;
+      const newDiTop = diTop - 2;
+      const newDiBottom = diBottom + 2;
+      const newDiLeft = diLeft - 2;
+      const newDiRight = diRight + 2;
 
       const styles = {
         cursor: 'pointer',
         fill: '#f07662',
+        transform: undefined,
       };
 
       switch (rotate) {

@@ -133,6 +133,7 @@ export default class UncontrolledEditorWithDrawables extends PureComponent<Props
           onDragStart={this.handleDragStart}
         >
           <Drawables
+            rotate={0}
             width={width}
             height={height}
             drawables={drawables}

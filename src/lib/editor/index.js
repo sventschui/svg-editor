@@ -262,11 +262,22 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
         viewBox={`0 0 ${width} ${height}`}
         width="100%"
         height="100%"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
         onMouseDown={this.svgMouseDownHandler}
         onWheel={this.handleWheel}
         style={canvasSytle}
         className={canvasClassName}
       >
+        <style>
+          {`
+            @keyframes dash {
+              to {
+                stroke-dashoffset: 100;
+              }
+            }
+          `}
+        </style>
         {/* invisible rect to determine actual width/height and convert
           stuff to viewBox coordinates */}
         <rect
@@ -289,7 +300,15 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
           )}
         >
           {/* The canvas (aka artboard) */}
-          <image xlinkHref={backgroundUrl} x="0" y="0" height={`${imageHeight}`} width={`${imageWidth}`} />
+          <image
+            clipPath="url(#svg-editor-cut)"
+            xlinkHref={backgroundUrl}
+            x="0"
+            y="0"
+            height={`${imageHeight}`}
+            width={`${imageWidth}`}
+          />
+
           {this.props.children}
         </g>
       </svg>
