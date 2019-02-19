@@ -45,11 +45,22 @@ export type Drawable = {
 type Props = {|
   height: number,
   width: number,
+  rotate: 0 | 90 | 180 | 270,
   canSelectDrawable: boolean,
   selectedDrawable?: ?string,
   onSelectDrawable: (id: string) => void,
   onDrawableTranslate: (id: string, x: number, y: number) => void,
+  onDrawableTranslateEnd?: (id: string, x: number, y: number) => void,
+  onRemoveDrawable?: (id: string) => void,
   onResizeDrawable: (
+    e: MouseEvent,
+    id: string,
+    handleX: 'left' | 'right',
+    handleY: 'top' | 'bottom',
+    newX: number,
+    newY: number,
+  ) => void,
+  onResizeDrawableEnd?: (
     e: MouseEvent,
     id: string,
     handleX: 'left' | 'right',
@@ -134,7 +145,18 @@ export default class Drawables extends PureComponent<Props, State> {
       lastCoords = currentCoords;
     };
 
-    const mouseUpHandler = () => {
+    const { onDrawableTranslateEnd } = this.props;
+
+    const mouseUpHandler = (e3: MouseEvent) => {
+      const currentCoords = transformPoint(e3);
+      if (onDrawableTranslateEnd) {
+        onDrawableTranslateEnd(
+          id,
+          currentCoords.x - lastCoords.x,
+          currentCoords.y - lastCoords.y,
+        );
+      }
+
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
     };
@@ -150,6 +172,14 @@ export default class Drawables extends PureComponent<Props, State> {
 
     e.stopPropagation();
     this.props.onSelectDrawable(id);
+  };
+
+  handleRemoveDrawable = (e: MouseEvent, id: string) => {
+    e.stopPropagation();
+
+    if (this.props.onRemoveDrawable) {
+      this.props.onRemoveDrawable(id);
+    }
   };
 
   handleResizeHandleMouseDown = (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => {
@@ -199,7 +229,22 @@ export default class Drawables extends PureComponent<Props, State> {
       );
     };
 
-    const mouseUpHandler = () => {
+
+    const { onResizeDrawableEnd } = this.props;
+
+    const mouseUpHandler = (e3: MouseEvent) => {
+      const newCoords = transformPoint(e3);
+      if (onResizeDrawableEnd) {
+        onResizeDrawableEnd(
+          e,
+          id,
+          handleX,
+          handleY,
+          newCoords.x,
+          newCoords.y,
+        );
+      }
+
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
     };
@@ -209,7 +254,12 @@ export default class Drawables extends PureComponent<Props, State> {
   }
 
   render() {
-    const { height, width, selectedDrawable } = this.props;
+    const {
+      height,
+      width,
+      selectedDrawable,
+      rotate,
+    } = this.props;
     const { diStrokeWidth } = this.state;
 
     return (
@@ -231,6 +281,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <EllipseDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   cx={item.cx}
                   cy={item.cy}
                   rx={item.rx}
@@ -243,6 +294,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'line':
@@ -250,6 +302,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <LineDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   x1={item.x1}
                   x2={item.x2}
                   y1={item.y1}
@@ -261,6 +314,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'path':
@@ -268,6 +322,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <PathDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   points={item.points}
                   stroke={item.stroke}
                   strokeWidth={item.strokeWidth}
@@ -275,6 +330,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onSelect={this.handleDrawableSelect}
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             case 'rect':
@@ -282,6 +338,7 @@ export default class Drawables extends PureComponent<Props, State> {
                 <RectDrawable
                   key={item.id}
                   id={item.id}
+                  rotate={rotate}
                   x={item.x}
                   y={item.y}
                   width={item.width}
@@ -294,6 +351,7 @@ export default class Drawables extends PureComponent<Props, State> {
                   onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                   dragIndicatorStrokeWidth={diStrokeWidth}
                   onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                  onRemoveDrawable={this.handleRemoveDrawable}
                 />
               );
             default:

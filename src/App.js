@@ -1,6 +1,7 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import PenIcon from '@material-ui/icons/Edit';
+import CropIcon from '@material-ui/icons/Crop';
 import DragIcon from '@material-ui/icons/OpenWith';
 import RectIcon from '@material-ui/icons/CropLandscape';
 import EllipseIcon from '@material-ui/icons/PanoramaFishEye';
@@ -11,15 +12,17 @@ import { CompactPicker } from 'react-color';
 import UncontrolledEditor from './lib/editor/uncontrolled';
 import BackgroundSource from './lib/background-source';
 import Drawables, { type Drawable } from './lib/editor/drawables';
+import Cropable, { type Crop } from './lib/editor/cropables';
 import ArtboardPen from './lib/editor/artboard/pen';
 import ArtboardRect from './lib/editor/artboard/rect';
 import ArtboardEllipse from './lib/editor/artboard/ellipse';
 import ArtboardLine from './lib/editor/artboard/line';
+import ArtboardCrop from './lib/editor/artboard/crop';
 import resizeDrawable from './lib/editor/drawables/resize';
 import translateDrawable from './lib/editor/drawables/translate';
 
 type State = {
-  drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line',
+  drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line' | 'crop',
   rotation: 0 | 90 | 180 | 270,
   strokeColorPickerOpen: boolean,
   strokeColor: string,
@@ -28,6 +31,7 @@ type State = {
   fillColor: string,
   drawables: Array<Drawable>,
   selectedDrawable: ?string,
+  crop: ?Crop
 };
 
 const colorStyle = {
@@ -95,6 +99,7 @@ export default class App extends PureComponent<{}, State> {
     fillColor: '#00008f',
     drawables: [],
     selectedDrawable: null,
+    crop: null,
   };
 
   renderLoading = () => (
@@ -105,7 +110,7 @@ export default class App extends PureComponent<{}, State> {
     <div>renderError</div>
   );
 
-  selectDrawMode = (drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line') => () => {
+  selectDrawMode = (drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line' | 'crop') => () => {
     this.setState({ drawMode });
   }
 
@@ -180,6 +185,12 @@ export default class App extends PureComponent<{}, State> {
     }));
   }
 
+  handleRemoveDrawable = (removedDrawable: string) => {
+    this.setState(state => ({
+      drawables: state.drawables.filter(item => item.id !== removedDrawable),
+    }));
+  }
+
   handleDrawableTranslate = (id: string, x: number, y: number) => {
     this.setState(state => ({
       drawables: state.drawables.map((i) => {
@@ -208,6 +219,77 @@ export default class App extends PureComponent<{}, State> {
     return pdfjs;
   }
 
+  handleCropEnd = (crop: Crop) => {
+    this.setState({
+      crop,
+    });
+  }
+
+  handleCropTranslate = (x: number, y: number) => {
+
+    this.setState((state) => {
+      if (!state.crop) {
+        return {};
+      }
+      return {
+        crop: {
+          ...state.crop,
+          x: state.crop.x + x,
+          y: state.crop.y + y,
+        },
+      };
+    });
+  }
+
+  handleRemoveCrop = () => {
+    this.setState({
+      crop: null,
+    });
+  }
+
+  handleResizeCrop = (
+    handleX: 'left' | 'right',
+    handleY: 'top' | 'bottom',
+    newX: number,
+    newY: number,
+  ) => {
+    this.setState((state) => {
+      if (!state.crop) {
+        return {};
+      }
+
+      let {
+        x,
+        y,
+        width,
+        height,
+      } = state.crop;
+
+      if (handleX === 'left') {
+        width = Math.max(10, width - (newX - x));
+        x = newX;
+      } else if (handleX === 'right') {
+        width = Math.max(10, newX - x);
+      }
+
+      if (handleY === 'top') {
+        height = Math.max(10, height - (newY - y));
+        y = newY;
+      } else if (handleY === 'bottom') {
+        height = Math.max(10, newY - y);
+      }
+      return {
+        crop: {
+          ...state.crop,
+          x,
+          y,
+          height,
+          width,
+        },
+      };
+    });
+  }
+
   render() {
     return (
       <div>
@@ -231,6 +313,7 @@ export default class App extends PureComponent<{}, State> {
               strokeColorPickerOpen,
               drawables,
               selectedDrawable,
+              crop,
             } = this.state;
 
             let Artboard;
@@ -289,6 +372,7 @@ export default class App extends PureComponent<{}, State> {
                   <RectIcon style={{ ...iconStyles, color: drawMode === 'rect' ? 'blue' : 'black' }} onClick={this.selectDrawMode('rect')} />
                   <EllipseIcon style={{ ...iconStyles, color: drawMode === 'ellipse' ? 'blue' : 'black' }} onClick={this.selectDrawMode('ellipse')} />
                   <LineIcon style={{ ...iconStyles, color: drawMode === 'line' ? 'blue' : 'black' }} onClick={this.selectDrawMode('line')} />
+                  <CropIcon style={{ ...iconStyles, color: drawMode === 'crop' ? 'blue' : 'black' }} onClick={this.selectDrawMode('crop')} />
                   <span style={{ margin: '10px', borderRight: '1px solid #333' }} />
                   <RotateLeftIcon style={iconStyles} onClick={this.rotate(-90)} />
                   <RotateRightIcon style={iconStyles} onClick={this.rotate(90)} />
@@ -301,7 +385,18 @@ export default class App extends PureComponent<{}, State> {
                   rotate={rotation}
                   canvasSytle={canvasStyle}
                 >
+                  <Cropable
+                    rotate={rotation}
+                    width={source.width}
+                    height={source.height}
+                    crop={crop}
+                    canTransformCrop={drawMode === 'crop' && !!crop}
+                    onResizeCrop={this.handleResizeCrop}
+                    onCropTranslate={this.handleCropTranslate}
+                    onRemoveCrop={this.handleRemoveCrop}
+                  />
                   <Drawables
+                    rotate={rotation}
                     width={source.width}
                     height={source.height}
                     drawables={drawables}
@@ -310,7 +405,16 @@ export default class App extends PureComponent<{}, State> {
                     selectedDrawable={selectedDrawable}
                     onResizeDrawable={this.handleResizeDrawable}
                     onDrawableTranslate={this.handleDrawableTranslate}
+                    onRemoveDrawable={this.handleRemoveDrawable}
                   />
+
+                  {drawMode === 'crop' && !crop && (
+                    <ArtboardCrop
+                      width={source.width}
+                      height={source.height}
+                      onCropEnd={this.handleCropEnd}
+                    />
+                  )}
                   {Artboard && (
                     // $FlowFixMe
                     <Artboard

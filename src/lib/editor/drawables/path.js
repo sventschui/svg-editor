@@ -4,6 +4,7 @@ import DragIndicator from './drag-indicator';
 
 type Props = {|
   id: string,
+  rotate: 0 | 90 | 180 | 270,
   points: Array<{ x: number, y: number }>,
   stroke: string,
   strokeWidth: number,
@@ -11,6 +12,7 @@ type Props = {|
   onSelect: (e: MouseEvent, id: string) => void,
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
+  onRemoveDrawable: (e: MouseEvent, id: string) => void,
 |};
 
 export default class PathDrawable extends PureComponent<Props> {
@@ -22,6 +24,8 @@ export default class PathDrawable extends PureComponent<Props> {
     this.props.onDragIndicatorMouseDown(e, this.props.id);
   };
 
+  handleRemoveDrawable = (e: MouseEvent) => this.props.onRemoveDrawable(e, this.props.id);
+
   render() {
     const {
       id,
@@ -30,6 +34,7 @@ export default class PathDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      rotate,
     } = this.props;
 
     // guard against corrupt data
@@ -63,6 +68,7 @@ export default class PathDrawable extends PureComponent<Props> {
         />
         <DragIndicator
           id={id}
+          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           diX={diX}
           diY={diY}
@@ -70,6 +76,7 @@ export default class PathDrawable extends PureComponent<Props> {
           diHeight={diHeight}
           diStrokeWidth={diStrokeWidth}
           selected={selected}
+          onRemoveDrawable={this.handleRemoveDrawable}
         />
       </g>
     );
