@@ -4,7 +4,6 @@ import DragIndicator from './drag-indicator';
 
 type Props = {|
   id: string,
-  rotate: 0 | 90 | 180 | 270,
   x1: number,
   x2: number,
   y1: number,
@@ -15,8 +14,7 @@ type Props = {|
   onSelect: (e: MouseEvent, id: string) => void,
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
-  onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
-  onRemoveDrawable: (e: MouseEvent, id: string) => void,
+  onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void
 |};
 
 export default class LineDrawable extends PureComponent<Props> {
@@ -32,8 +30,6 @@ export default class LineDrawable extends PureComponent<Props> {
     this.props.onDragIndicatorMouseDown(e, this.props.id);
   };
 
-  handleRemoveDrawable = (e: MouseEvent) => this.props.onRemoveDrawable(e, this.props.id);
-
   render() {
     const {
       id,
@@ -45,7 +41,6 @@ export default class LineDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
-      rotate,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -68,7 +63,6 @@ export default class LineDrawable extends PureComponent<Props> {
         <line x1={x1} x2={x2} y1={y1} y2={y2} stroke={stroke} strokeWidth={strokeWidth} />
         <DragIndicator
           id={id}
-          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}

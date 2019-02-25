@@ -1,17 +1,21 @@
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent, type Node } from 'react';
 import type { Drawable } from '../drawables';
 
-type Props ={|
+type Props ={
   drawingFill: string,
   drawingStroke: string,
   drawingStrokeWidth: number,
   width: number,
   height: number,
+  children: Node,
   onDrawEnd: (drawable: Drawable) => void,
   minWidth: number,
   minHeight: number,
-|};
+  clipPath?: string,
+  x: number,
+  y: number,
+};
 
 type State = {
   startCoord?: { x: number, y: number } | null,
@@ -120,25 +124,32 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
     const {
       width,
       height,
+      x,
+      y,
       drawingFill,
       drawingStroke,
       drawingStrokeWidth,
+      children,
+      clipPath,
     } = this.props;
 
     const ellipseBounds = this.getEllipseBounds();
 
     return (
-      <Fragment>
+      <g
+        key="artboard"
+        style={artboardStyles}
+        clipPath={clipPath}
+        onMouseDown={this.handleArtboardMouseDown}
+      >
         <rect
-          style={artboardStyles}
-          key="artboard"
           fill="none"
-          onMouseDown={this.handleArtboardMouseDown}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
+          x={`${x}`}
+          y={`${y}`}
+          width={`${width}`}
+          height={`${height}`}
         />
+        {children}
         {ellipseBounds && (
           <ellipse
             {...ellipseBounds}
@@ -148,7 +159,7 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
             strokeWidth={drawingStrokeWidth}
           />
         )}
-      </Fragment>
+      </g>
     );
   }
 }
