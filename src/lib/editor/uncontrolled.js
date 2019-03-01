@@ -58,22 +58,16 @@ export default class UncontrolledEditor extends PureComponent<Props, State> {
       ...otherProps
     } = this.props;
 
-    const { children, ...propsWitoutChildren } = this.props;
-
     return (
-      <div>
-        <Editor
-          zoom={zoom}
-          translateX={translateX}
-          translateY={translateY}
-          onDrag={this.handleDrag}
-          onZoom={this.handleZoom}
-          rotate={0}
-          {...otherProps}
-        />
-        <pre>{JSON.stringify(this.state, null, 2)}</pre>
-        <pre>{JSON.stringify(propsWitoutChildren, null, 2)}</pre>
-      </div>
+      <Editor
+        zoom={zoom}
+        translateX={translateX}
+        translateY={translateY}
+        onDrag={this.handleDrag}
+        onZoom={this.handleZoom}
+        rotate={0}
+        {...otherProps}
+      />
     );
   }
 }

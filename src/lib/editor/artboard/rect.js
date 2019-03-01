@@ -22,7 +22,7 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'all' };
+const artboardStyles = { pointerEvents: 'all', cursor: 'crosshair' };
 
 export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {

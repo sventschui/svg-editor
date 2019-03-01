@@ -90,6 +90,11 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
     return `matrix(${matrix[0]}, ${matrix[1]}, ${matrix[2]}, ${matrix[3]}, ${matrix[4]}, ${matrix[5]})`;
   });
 
+  makeCanvasSytle = memoize((base, allowDrag) => ({
+    cursor: allowDrag ? 'move' : null,
+    ...base,
+  }));
+
   svgMouseDownHandler = (e: MouseEvent) => {
     if (this.props.allowDrag) {
       const referenceRect = this.referenceRectNoZoom.current;
@@ -164,7 +169,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
     const newZoom = Math.min(
       maxZoom || 4,
       Math.max(
-        minZoom || -4,
+        minZoom || 1,
         zoom - (e.deltaY / 100),
       ),
     );
@@ -185,6 +190,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       canvasClassName,
       crop,
       drawMode,
+      allowDrag,
     } = this.props;
 
     let width: number;
@@ -227,7 +233,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
         xmlnsXlink="http://www.w3.org/1999/xlink"
         onMouseDown={this.svgMouseDownHandler}
         onWheel={this.handleWheel}
-        style={canvasSytle}
+        style={this.makeCanvasSytle(canvasSytle, allowDrag)}
         className={canvasClassName}
       >
         <style>

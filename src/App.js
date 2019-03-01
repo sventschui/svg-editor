@@ -1,4 +1,5 @@
 // @flow
+/* eslint-disable import/no-extraneous-dependencies */
 import React, { PureComponent, Fragment } from 'react';
 import PenIcon from '@material-ui/icons/Edit';
 import CropIcon from '@material-ui/icons/Crop';
@@ -46,6 +47,9 @@ const iconStyles = {
 const canvasStyle = {
   border: '1px solid black',
   background: 'gray',
+  flex: '1',
+  height: 'auto',
+  width: 'auto',
 };
 
 const colors = [
@@ -285,124 +289,121 @@ export default class App extends PureComponent<{}, State> {
 
   render() {
     return (
-      <div>
-        <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs} hqPdf>
-          {(source) => {
-            if (source.state === 'LOADING') {
-              return (<div>Loading...</div>);
-            }
+      <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs} hqPdf>
+        {(source) => {
+          if (source.state === 'LOADING') {
+            return (<div>Loading...</div>);
+          }
 
-            if (source.state === 'ERROR') {
-              return (<div>Error...</div>);
-            }
+          if (source.state === 'ERROR') {
+            return (<div>Error...</div>);
+          }
 
-            const {
-              drawMode,
-              rotation,
-              fillColor,
-              fillColorPickerOpen,
-              strokeColor,
-              strokeWidth,
-              strokeColorPickerOpen,
-              drawables,
-              selectedDrawable,
-              crop,
-            } = this.state;
+          const {
+            drawMode,
+            rotation,
+            fillColor,
+            fillColorPickerOpen,
+            strokeColor,
+            strokeWidth,
+            strokeColorPickerOpen,
+            drawables,
+            selectedDrawable,
+            crop,
+          } = this.state;
 
-            return (
-              <div>
-                <div style={{ display: 'flex' }}>
-                  {
-                    drawMode != null && (
-                      <Fragment>
-                        {(drawMode === 'rect' || drawMode === 'ellipse') && (
-                          <Fragment key="fill">
-                            <button
-                              type="button"
-                              key="fillColor"
-                              style={{ ...colorStyle, backgroundColor: fillColor }}
-                              onClick={this.toggleFillColorPicker}
-                            />
-                            {fillColorPickerOpen && (
-                              <CompactPicker key="fillColorPicker" colors={colors} onChange={this.handleFillColorChange} />
-                            )}
-                          </Fragment>
-                        )}
-                        <input key="strokeWidth" type="number" value={strokeWidth} onChange={this.handleStrokeWidthChange} />
-                        <button
-                          type="button"
-                          key="strokeColor"
-                          style={{ ...colorStyle, backgroundColor: strokeColor }}
-                          onClick={this.toggleStrokeColorPicker}
-                        />
-                        {strokeColorPickerOpen && (
-                          <CompactPicker key="strokeColorPicker" colors={colors} onChange={this.handleStrokeColorChange} />
-                        )}
-                        <span key="spacer" style={{ margin: '10px', borderRight: '1px solid #333' }} />
-                      </Fragment>
-                    )
-                  }
-                  <DragIcon style={{ ...iconStyles, color: drawMode === null ? 'blue' : 'black' }} onClick={this.selectDrawMode(null)} />
-                  <PenIcon style={{ ...iconStyles, color: drawMode === 'pen' ? 'blue' : 'black' }} onClick={this.selectDrawMode('pen')} />
-                  <RectIcon style={{ ...iconStyles, color: drawMode === 'rect' ? 'blue' : 'black' }} onClick={this.selectDrawMode('rect')} />
-                  <EllipseIcon style={{ ...iconStyles, color: drawMode === 'ellipse' ? 'blue' : 'black' }} onClick={this.selectDrawMode('ellipse')} />
-                  <LineIcon style={{ ...iconStyles, color: drawMode === 'line' ? 'blue' : 'black' }} onClick={this.selectDrawMode('line')} />
-                  <CropIcon style={{ ...iconStyles, color: drawMode === 'crop' ? 'blue' : 'black' }} onClick={this.selectDrawMode('crop')} />
-                  <span style={{ margin: '10px', borderRight: '1px solid #333' }} />
-                  <RotateLeftIcon style={iconStyles} onClick={this.rotate(-90)} />
-                  <RotateRightIcon style={iconStyles} onClick={this.rotate(90)} />
-                </div>
-                <UncontrolledEditor
-                  drawMode={drawMode}
-                  allowDrag={drawMode === null}
-                  backgroundUrl={source.url}
+          return (
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexShrink: '0' }}>
+                {
+                  drawMode != null && (
+                    <Fragment>
+                      {(drawMode === 'rect' || drawMode === 'ellipse') && (
+                        <Fragment key="fill">
+                          <button
+                            type="button"
+                            key="fillColor"
+                            style={{ ...colorStyle, backgroundColor: fillColor }}
+                            onClick={this.toggleFillColorPicker}
+                          />
+                          {fillColorPickerOpen && (
+                            <CompactPicker key="fillColorPicker" colors={colors} onChange={this.handleFillColorChange} />
+                          )}
+                        </Fragment>
+                      )}
+                      <input key="strokeWidth" type="number" value={strokeWidth} onChange={this.handleStrokeWidthChange} />
+                      <button
+                        type="button"
+                        key="strokeColor"
+                        style={{ ...colorStyle, backgroundColor: strokeColor }}
+                        onClick={this.toggleStrokeColorPicker}
+                      />
+                      {strokeColorPickerOpen && (
+                        <CompactPicker key="strokeColorPicker" colors={colors} onChange={this.handleStrokeColorChange} />
+                      )}
+                      <span key="spacer" style={{ margin: '10px', borderRight: '1px solid #333' }} />
+                    </Fragment>
+                  )
+                }
+                <DragIcon style={{ ...iconStyles, color: drawMode === null ? 'blue' : 'black' }} onClick={this.selectDrawMode(null)} />
+                <PenIcon style={{ ...iconStyles, color: drawMode === 'pen' ? 'blue' : 'black' }} onClick={this.selectDrawMode('pen')} />
+                <RectIcon style={{ ...iconStyles, color: drawMode === 'rect' ? 'blue' : 'black' }} onClick={this.selectDrawMode('rect')} />
+                <EllipseIcon style={{ ...iconStyles, color: drawMode === 'ellipse' ? 'blue' : 'black' }} onClick={this.selectDrawMode('ellipse')} />
+                <LineIcon style={{ ...iconStyles, color: drawMode === 'line' ? 'blue' : 'black' }} onClick={this.selectDrawMode('line')} />
+                <CropIcon style={{ ...iconStyles, color: drawMode === 'crop' ? 'blue' : 'black' }} onClick={this.selectDrawMode('crop')} />
+                <span style={{ margin: '10px', borderRight: '1px solid #333' }} />
+                <RotateLeftIcon style={iconStyles} onClick={this.rotate(-90)} />
+                <RotateRightIcon style={iconStyles} onClick={this.rotate(90)} />
+              </div>
+              <UncontrolledEditor
+                drawMode={drawMode}
+                allowDrag={drawMode === null}
+                backgroundUrl={source.url}
+                width={source.width}
+                height={source.height}
+                rotate={rotation}
+                canvasSytle={canvasStyle}
+              >
+                <Cropable
                   width={source.width}
                   height={source.height}
-                  rotate={rotation}
-                  canvasSytle={canvasStyle}
-                  // crop={crop}
+                  crop={crop}
+                  canTransformCrop={drawMode === 'crop' && !!crop}
+                  onResizeCrop={this.handleResizeCrop}
+                  onCropTranslate={this.handleCropTranslate}
+                  onRemoveCrop={this.handleRemoveCrop}
+                  onConfirmCrop={this.handleConfirmCrop}
+                />
+                <Artboard
+                  drawMode={drawMode}
+                  width={source.width}
+                  height={source.height}
+                  crop={crop}
+                  onDrawEnd={this.handleDrawEnd}
+                  onCropEnd={this.handleCropEnd}
+                  drawingFill={fillColor}
+                  drawingStroke={strokeColor}
+                  drawingStrokeWidth={strokeWidth}
                 >
-                  <Cropable
+                  <Drawables
+                    crop={crop}
                     width={source.width}
                     height={source.height}
-                    crop={crop}
-                    canTransformCrop={drawMode === 'crop' && !!crop}
-                    onResizeCrop={this.handleResizeCrop}
-                    onCropTranslate={this.handleCropTranslate}
-                    onRemoveCrop={this.handleRemoveCrop}
-                    onConfirmCrop={this.handleConfirmCrop}
+                    drawables={drawables}
+                    onSelectDrawable={this.handleSelectDrawable}
+                    canSelectDrawable={drawMode !== null}
+                    selectedDrawable={selectedDrawable}
+                    onResizeDrawable={this.handleResizeDrawable}
+                    onDrawableTranslate={this.handleDrawableTranslate}
+                    onRemoveDrawable={this.handleRemoveDrawable}
                   />
-                  <Artboard
-                    drawMode={drawMode}
-                    width={source.width}
-                    height={source.height}
-                    crop={crop}
-                    onDrawEnd={this.handleDrawEnd}
-                    onCropEnd={this.handleCropEnd}
-                    drawingFill={fillColor}
-                    drawingStroke={strokeColor}
-                    drawingStrokeWidth={strokeWidth}
-                  >
-                    <Drawables
-                      crop={crop}
-                      width={source.width}
-                      height={source.height}
-                      drawables={drawables}
-                      onSelectDrawable={this.handleSelectDrawable}
-                      canSelectDrawable={drawMode !== null}
-                      selectedDrawable={selectedDrawable}
-                      onResizeDrawable={this.handleResizeDrawable}
-                      onDrawableTranslate={this.handleDrawableTranslate}
-                      onRemoveDrawable={this.handleRemoveDrawable}
-                    />
-                  </Artboard>
+                </Artboard>
 
-                </UncontrolledEditor>
-              </div>
-            );
-          }}
-        </BackgroundSource>
-      </div>
+              </UncontrolledEditor>
+            </div>
+          );
+        }}
+      </BackgroundSource>
     );
   }
 }
