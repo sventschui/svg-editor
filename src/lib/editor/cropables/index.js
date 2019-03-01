@@ -12,7 +12,6 @@ export type Crop = {
 type Props = {|
   height: number,
   width: number,
-  rotate: 0 | 90 | 180 | 270,
   canTransformCrop: boolean,
   onCropTranslate: (x: number, y: number) => void,
   onCropTranslateEnd?: (x: number, y: number) => void,
@@ -29,6 +28,7 @@ type Props = {|
     newX: number,
     newY: number,
   ) => void,
+  onConfirmCrop?: () => void,
   crop: ?Crop
 |};
 
@@ -38,6 +38,41 @@ type State = {
 
 export default class Cropables extends PureComponent<Props, State> {
   referenceRect: ?Element = null;
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.onWindowKeyPress);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onWindowKeyPress);
+  }
+
+  onWindowKeyPress = (event: KeyboardEvent) => {
+    const {
+      onRemoveCrop,
+      crop,
+      canTransformCrop,
+      onConfirmCrop,
+    } = this.props;
+
+    const eventTarget: HTMLElement = (event.target: any);
+    const tagName = eventTarget.tagName.toLowerCase();
+
+    if (
+      tagName !== 'input'
+      && tagName !== 'textarea'
+      && !eventTarget.isContentEditable
+      && crop
+      && canTransformCrop
+    ) {
+      if (onConfirmCrop && event.key === 'Enter') {
+        onConfirmCrop();
+      }
+      if (onRemoveCrop && (event.key === 'Backspace' || event.key === 'Delete')) {
+        onRemoveCrop();
+      }
+    }
+  };
 
   referenceRectRef = (el: ?Element) => {
     this.referenceRect = el;
@@ -192,7 +227,6 @@ export default class Cropables extends PureComponent<Props, State> {
       height,
       width,
       crop,
-      rotate,
       canTransformCrop,
     } = this.props;
 
@@ -225,10 +259,8 @@ export default class Cropables extends PureComponent<Props, State> {
           height={cropHeight}
           width={cropWidth}
           active={canTransformCrop}
-          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
-          onRemoveCrop={this.handleRemoveCrop}
         />
       </g>
     );

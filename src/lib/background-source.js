@@ -153,6 +153,7 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
             }
 
             const url = (URL || window.webkitURL).createObjectURL(blobSource);
+
             const img = document.createElement('img');
             const prom = new Promise((res, rej) => {
               img.onload = () => {

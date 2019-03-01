@@ -3,12 +3,20 @@
 import React, { PureComponent, type Node } from 'react';
 import memoize from 'memoize-one';
 
+
+type Crop = {
+  x: number,
+  y: number,
+  height: number,
+  width: number,
+}
+
 export type Props = {
   // source info
   backgroundUrl: string,
   width: number,
   height: number,
-
+  crop?: ?Crop,
   // zoom, rotate, translate
   zoom: number,
   translateX: number,
@@ -28,38 +36,13 @@ export type Props = {
 
   canvasSytle?: ?any,
   canvasClassName?: ?string,
-
-  // draw support: TODO: move to other component
-  // onDrawEnd: (shape: DrawItem) => void,
-  // drawMethod?: 'path' | null,
-  // drawStroke?: string,
-  // drawStrokeWidth?: number,
-  // drawFill?: string,
+  drawMode: ?string,
 };
 
 type State = {
   // selectedItem?: string | null,
   // drawingPoints?: Array<DrawingPoint> | null,
 };
-
-// function Path({
-//   points,
-//   stroke,
-//   strokeWidth,
-// }: {
-//   points: Array<DrawingPoint>,
-//   stroke: string,
-//   strokeWidth: number,
-// }) {
-//   return (
-//     <path
-//       d={`M ${points.map(p => `${p.x} ${p.y}`).join('L')}`}
-//       fill="none"
-//       strokeWidth={strokeWidth}
-//       stroke={stroke}
-//     />
-//   );
-// }
 
 export default class Editor extends PureComponent<$Exact<Props>, State> {
   referenceRectNoZoom: { current: null | Element } = React.createRef();
@@ -172,66 +155,22 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
     }
   };
 
-  // svgMouseDownHandlerDrawPath = (e: MouseEvent) => {
-  //   const referenceRect = this.referenceRect.current;
-
-  //   if (!referenceRect) {
-  //     console.error('Reference rect not available!');
-  //     return;
-  //   }
-
-  //   const rect = referenceRect.getBoundingClientRect();
-
-  //   const initialCoords = convertToLocalCoordinates(
-  //     referenceRect,
-  //     e.clientX - rect.x,
-  //     e.clientY - rect.y,
-  //   );
-
-  //   const points = [initialCoords];
-  //   this.setState({ drawingPoints: points });
-
-  //   const mouseMoveHandler = (e2: MouseEvent) => {
-  //     points.push(convertToLocalCoordinates(
-  //       referenceRect,
-  //       e2.clientX - rect.x,
-  //       e2.clientY - rect.y,
-  //     ));
-  //     this.setState({ drawingPoints: points.slice() });
-  //   };
-
-  //   const mouseUpHandler = () => {
-  //     window.removeEventListener('mousemove', mouseMoveHandler);
-  //     window.removeEventListener('mouseup', mouseUpHandler);
-  //     // TODO: finish drawing...
-
-  //     const id = String(Date.now());
-  //     this.props.onDrawEnd({
-  //       type: 'path',
-  //       id,
-  //       points,
-  //       stroke: this.props.drawStroke || 'black',
-  //       strokeWidth: this.props.drawStrokeWidth || 5,
-  //     });
-  //     this.setState({
-  //       drawingPoints: null,
-  //       selectedItem: id,
-  //     });
-  //   };
-
-  //   window.addEventListener('mousemove', mouseMoveHandler);
-  //   window.addEventListener('mouseup', mouseUpHandler);
-  // };
-
   handleWheel = (e: WheelEvent) => {
-    e.preventDefault();
-    this.props.onZoom(Math.min(
-      this.props.maxZoom || 4,
+    const {
+      maxZoom,
+      minZoom,
+      zoom,
+    } = this.props;
+
+    const newZoom = Math.min(
+      maxZoom || 4,
       Math.max(
-        this.props.minZoom || 1,
-        this.props.zoom - (e.deltaY / 100),
+        minZoom || -4,
+        zoom - (e.deltaY / 100),
       ),
-    ));
+    );
+
+    this.props.onZoom(newZoom);
   };
 
   render() {
@@ -245,6 +184,8 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       rotate,
       canvasSytle,
       canvasClassName,
+      crop,
+      drawMode,
     } = this.props;
 
     let width: number;
@@ -257,9 +198,30 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       height = imageHeight;
     }
 
+
+    let vHeight = height;
+    let vWidth = width;
+    let vX = 0;
+    let vY = 0;
+
+    if (crop && drawMode !== 'crop') {
+      const {
+        height: cropHeight,
+        width: cropWidth,
+        x,
+        y,
+      } = crop;
+
+      vHeight = cropHeight;
+      vWidth = cropWidth;
+      vX = x;
+      vY = y;
+    }
+
+
     return (
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`${vX} ${vY} ${vWidth} ${vHeight}`}
         width="100%"
         height="100%"
         xmlns="http://www.w3.org/2000/svg"
@@ -281,10 +243,10 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
         {/* invisible rect to determine actual width/height and convert
           stuff to viewBox coordinates */}
         <rect
-          x="0"
-          y="0"
-          width={`${width}`}
-          height={`${height}`}
+          x={`${vX}`}
+          y={`${vY}`}
+          width={`${vWidth}`}
+          height={`${vHeight}`}
           ref={this.referenceRectNoZoom}
           fill="none"
         />
@@ -299,6 +261,13 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
             rotate,
           )}
         >
+          <rect
+            x={`${vX}`}
+            y={`${vY}`}
+            width={`${vWidth}`}
+            height={`${vHeight}`}
+            fill="none"
+          />
           {/* The canvas (aka artboard) */}
           <image
             clipPath="url(#svg-editor-cut)"
@@ -308,7 +277,6 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
             height={`${imageHeight}`}
             width={`${imageWidth}`}
           />
-
           {this.props.children}
         </g>
       </svg>

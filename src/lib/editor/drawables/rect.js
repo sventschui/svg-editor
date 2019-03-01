@@ -8,7 +8,6 @@ type Props = {|
   y: number,
   width: number,
   height: number,
-  rotate: 0 | 90 | 180 | 270,
   fill: string,
   stroke: string,
   strokeWidth: number,
@@ -17,7 +16,6 @@ type Props = {|
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
   onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
-  onRemoveDrawable: (e: MouseEvent, id: string) => void,
 |};
 
 export default class RectDrawable extends PureComponent<Props> {
@@ -37,8 +35,6 @@ export default class RectDrawable extends PureComponent<Props> {
     this.props.onDragIndicatorMouseDown(e, this.props.id);
   };
 
-  handleRemoveDrawable = (e: MouseEvent) => this.props.onRemoveDrawable(e, this.props.id);
-
   render() {
     const {
       id,
@@ -51,7 +47,6 @@ export default class RectDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
-      rotate,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -76,15 +71,13 @@ export default class RectDrawable extends PureComponent<Props> {
           stroke={stroke}
           strokeWidth={strokeWidth}
         />
-        <DragIndicator
+        {selected && (<DragIndicator
           id={id}
-          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}
           onResizeHandleBottomLeftMouseDown={this.handleResizeHandleBottomLeftMouseDown}
           onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
-          onRemoveDrawable={this.handleRemoveDrawable}
           diX={diX}
           diY={diY}
           diWidth={diWidth}
@@ -92,6 +85,7 @@ export default class RectDrawable extends PureComponent<Props> {
           diStrokeWidth={diStrokeWidth}
           selected={selected}
         />
+        )}
       </g>
     );
   }
