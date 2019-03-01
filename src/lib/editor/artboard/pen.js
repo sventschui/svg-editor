@@ -1,14 +1,18 @@
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent, type Node } from 'react';
 import type { Drawable } from '../drawables';
 
-type Props ={|
+type Props ={
   drawingStroke: string,
   drawingStrokeWidth: number,
   width: number,
   height: number,
+  children: Node,
   onDrawEnd: (drawable: Drawable) => void,
-|};
+  clipPath?: string,
+  x: number,
+  y: number,
+};
 
 type State = {
   drawingPoints?: ?Array<{ x: number, y: number }>,
@@ -102,26 +106,36 @@ export default class ArtboardPen extends PureComponent<Props, State> {
     const {
       width,
       height,
+      x,
+      y,
       drawingStroke,
       drawingStrokeWidth,
+      children,
+      clipPath,
     } = this.props;
+
     const {
       drawingPoints,
     } = this.state;
 
     return (
-      <Fragment>
+      <g
+        key="artboard"
+        style={artboardStyles}
+        clipPath={clipPath}
+        onMouseDown={this.handleArtboardMouseDown}
+      >
         <rect
           style={artboardStyles}
           pointerEvents="bounding-box"
           key="artboard"
           fill="none"
-          onMouseDown={this.handleArtboardMouseDown}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
+          x={`${x}`}
+          y={`${y}`}
+          width={`${width}`}
+          height={`${height}`}
         />
+        {children}
         {drawingPoints && (
           <Path
             key="path"
@@ -130,7 +144,7 @@ export default class ArtboardPen extends PureComponent<Props, State> {
             strokeWidth={drawingStrokeWidth}
           />
         )}
-      </Fragment>
+      </g>
     );
   }
 }

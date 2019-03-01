@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent, Fragment, type Node } from 'react';
 
 
 export type Crop = {
@@ -9,13 +9,14 @@ export type Crop = {
   height: number,
 }
 
-type Props ={|
+type Props = {
   width: number,
   height: number,
   onCropEnd: (crop: Crop) => void,
   minWidth: number,
   minHeight: number,
-|};
+  children: Node,
+};
 
 type State = {
   startCoord?: { x: number, y: number } | null,
@@ -112,6 +113,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
     const {
       width,
       height,
+      children,
     } = this.props;
 
     const rectBounds = this.getRectBounds();
@@ -129,6 +131,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
           width={width}
           height={height}
         />
+        {children}
         {rectBounds && (
           <rect
             {...rectBounds}

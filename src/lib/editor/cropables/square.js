@@ -7,11 +7,9 @@ type Props = {|
   y: number,
   width: number,
   height: number,
-  rotate: 0 | 90 | 180 | 270,
   active: boolean,
   onDragIndicatorMouseDown: (e: MouseEvent) => void,
   onResizeHandleMouseDown: (e: MouseEvent, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
-  onRemoveCrop: (e: MouseEvent) => void,
 |};
 
 export default class RectCrop extends PureComponent<Props> {
@@ -27,8 +25,6 @@ export default class RectCrop extends PureComponent<Props> {
     this.props.onDragIndicatorMouseDown(e);
   };
 
-  handleRemoveCrop = (e: MouseEvent) => this.props.onRemoveCrop(e);
-
   render() {
     const {
       x,
@@ -36,7 +32,6 @@ export default class RectCrop extends PureComponent<Props> {
       width,
       height,
       active,
-      rotate,
     } = this.props;
 
     const id = 'svg-editor-cut';
@@ -66,13 +61,11 @@ export default class RectCrop extends PureComponent<Props> {
 
         <DragIndicator
           id={id}
-          rotate={rotate}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}
           onResizeHandleBottomLeftMouseDown={this.handleResizeHandleBottomLeftMouseDown}
           onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
-          onRemoveDrawable={this.handleRemoveCrop}
           diX={diX}
           diY={diY}
           diWidth={diWidth}

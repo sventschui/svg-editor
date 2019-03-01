@@ -13,11 +13,7 @@ import UncontrolledEditor from './lib/editor/uncontrolled';
 import BackgroundSource from './lib/background-source';
 import Drawables, { type Drawable } from './lib/editor/drawables';
 import Cropable, { type Crop } from './lib/editor/cropables';
-import ArtboardPen from './lib/editor/artboard/pen';
-import ArtboardRect from './lib/editor/artboard/rect';
-import ArtboardEllipse from './lib/editor/artboard/ellipse';
-import ArtboardLine from './lib/editor/artboard/line';
-import ArtboardCrop from './lib/editor/artboard/crop';
+import Artboard from './lib/editor/artboard';
 import resizeDrawable from './lib/editor/drawables/resize';
 import translateDrawable from './lib/editor/drawables/translate';
 
@@ -111,7 +107,7 @@ export default class App extends PureComponent<{}, State> {
   );
 
   selectDrawMode = (drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line' | 'crop') => () => {
-    this.setState({ drawMode });
+    this.setState({ drawMode, selectedDrawable: null });
   }
 
   rotate = (degrees: 90 | -90) => () => {
@@ -152,14 +148,8 @@ export default class App extends PureComponent<{}, State> {
     this.setState({ strokeWidth: e.target.value });
   }
 
-  handleSelectDrawable = (selectedDrawable: string) => {
+  handleSelectDrawable = (selectedDrawable: ?string) => {
     this.setState({ selectedDrawable });
-  }
-
-  handleDrawEnd = (drawable: Drawable) => {
-    this.setState(state => ({
-      drawables: [...state.drawables, drawable],
-    }));
   }
 
   handleDragStart = () => {
@@ -225,8 +215,11 @@ export default class App extends PureComponent<{}, State> {
     });
   }
 
-  handleCropTranslate = (x: number, y: number) => {
+  handleConfirmCrop = () => {
+    this.setState({ drawMode: null });
+  }
 
+  handleCropTranslate = (x: number, y: number) => {
     this.setState((state) => {
       if (!state.crop) {
         return {};
@@ -316,24 +309,6 @@ export default class App extends PureComponent<{}, State> {
               crop,
             } = this.state;
 
-            let Artboard;
-            switch (drawMode) {
-              case 'pen':
-                Artboard = ArtboardPen;
-                break;
-              case 'rect':
-                Artboard = ArtboardRect;
-                break;
-              case 'ellipse':
-                Artboard = ArtboardEllipse;
-                break;
-              case 'line':
-                Artboard = ArtboardLine;
-                break;
-              default:
-                Artboard = null;
-            }
-
             return (
               <div>
                 <div style={{ display: 'flex' }}>
@@ -378,15 +353,16 @@ export default class App extends PureComponent<{}, State> {
                   <RotateRightIcon style={iconStyles} onClick={this.rotate(90)} />
                 </div>
                 <UncontrolledEditor
+                  drawMode={drawMode}
                   allowDrag={drawMode === null}
                   backgroundUrl={source.url}
                   width={source.width}
                   height={source.height}
                   rotate={rotation}
                   canvasSytle={canvasStyle}
+                  // crop={crop}
                 >
                   <Cropable
-                    rotate={rotation}
                     width={source.width}
                     height={source.height}
                     crop={crop}
@@ -394,38 +370,33 @@ export default class App extends PureComponent<{}, State> {
                     onResizeCrop={this.handleResizeCrop}
                     onCropTranslate={this.handleCropTranslate}
                     onRemoveCrop={this.handleRemoveCrop}
+                    onConfirmCrop={this.handleConfirmCrop}
                   />
-                  <Drawables
-                    rotate={rotation}
+                  <Artboard
+                    drawMode={drawMode}
                     width={source.width}
                     height={source.height}
-                    drawables={drawables}
-                    onSelectDrawable={this.handleSelectDrawable}
-                    canSelectDrawable={drawMode === null}
-                    selectedDrawable={selectedDrawable}
-                    onResizeDrawable={this.handleResizeDrawable}
-                    onDrawableTranslate={this.handleDrawableTranslate}
-                    onRemoveDrawable={this.handleRemoveDrawable}
-                  />
+                    crop={crop}
+                    onDrawEnd={this.handleDrawEnd}
+                    onCropEnd={this.handleCropEnd}
+                    drawingFill={fillColor}
+                    drawingStroke={strokeColor}
+                    drawingStrokeWidth={strokeWidth}
+                  >
+                    <Drawables
+                      crop={crop}
+                      width={source.width}
+                      height={source.height}
+                      drawables={drawables}
+                      onSelectDrawable={this.handleSelectDrawable}
+                      canSelectDrawable={drawMode !== null}
+                      selectedDrawable={selectedDrawable}
+                      onResizeDrawable={this.handleResizeDrawable}
+                      onDrawableTranslate={this.handleDrawableTranslate}
+                      onRemoveDrawable={this.handleRemoveDrawable}
+                    />
+                  </Artboard>
 
-                  {drawMode === 'crop' && !crop && (
-                    <ArtboardCrop
-                      width={source.width}
-                      height={source.height}
-                      onCropEnd={this.handleCropEnd}
-                    />
-                  )}
-                  {Artboard && (
-                    // $FlowFixMe
-                    <Artboard
-                      width={source.width}
-                      height={source.height}
-                      onDrawEnd={this.handleDrawEnd}
-                      drawingFill={fillColor}
-                      drawingStroke={strokeColor}
-                      drawingStrokeWidth={strokeWidth}
-                    />
-                  )}
                 </UncontrolledEditor>
               </div>
             );

@@ -42,13 +42,19 @@ export type Drawable = {
   stroke: string,
 };
 
+type Crop = {
+  x: number,
+  y: number,
+  height: number,
+  width: number,
+}
+
 type Props = {|
   height: number,
   width: number,
-  rotate: 0 | 90 | 180 | 270,
   canSelectDrawable: boolean,
   selectedDrawable?: ?string,
-  onSelectDrawable: (id: string) => void,
+  onSelectDrawable: (id: ?string) => void,
   onDrawableTranslate: (id: string, x: number, y: number) => void,
   onDrawableTranslateEnd?: (id: string, x: number, y: number) => void,
   onRemoveDrawable?: (id: string) => void,
@@ -70,11 +76,13 @@ type Props = {|
   ) => void,
   drawables: Array<Drawable>,
   defaultDiStrokeWidth?: number,
+  crop: ?Crop,
 |};
 
 type State = {
   diStrokeWidth: ?number,
 };
+
 
 export default class Drawables extends PureComponent<Props, State> {
   referenceRect: ?Element = null;
@@ -85,6 +93,36 @@ export default class Drawables extends PureComponent<Props, State> {
       diStrokeWidth: props.defaultDiStrokeWidth || 1,
     };
   }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.onWindowKeyPress);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onWindowKeyPress);
+  }
+
+  onWindowKeyPress = (event: KeyboardEvent) => {
+    const { selectedDrawable, onRemoveDrawable, onSelectDrawable } = this.props;
+
+    const eventTarget: HTMLElement = (event.target: any);
+    const tagName = eventTarget.tagName.toLowerCase();
+
+    if (
+      tagName !== 'input'
+      && tagName !== 'textarea'
+      && !eventTarget.isContentEditable
+      && selectedDrawable
+    ) {
+      if (onRemoveDrawable) {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+          onSelectDrawable(null);
+        } else if (event.key === 'Backspace' || event.key === 'Delete') {
+          onRemoveDrawable(selectedDrawable);
+        }
+      }
+    }
+  };
 
   referenceRectRef = (el: ?Element) => {
     this.referenceRect = el;
@@ -257,112 +295,141 @@ export default class Drawables extends PureComponent<Props, State> {
     window.addEventListener('mousemove', mouseMoveHandler);
   }
 
+  sortBySelected = (drawableA: Drawable, drawableB: Drawable) => {
+    const { selectedDrawable } = this.props;
+
+    if (selectedDrawable === drawableA.id) {
+      return 1;
+    }
+
+    if (selectedDrawable === drawableB.id) {
+      return -1;
+    }
+
+    return 0;
+  };
+
   render() {
     const {
       height,
       width,
       selectedDrawable,
-      rotate,
+      crop,
     } = this.props;
     const { diStrokeWidth } = this.state;
 
+    let vHeight = height;
+    let vWidth = width;
+    let vX = 0;
+    let vY = 0;
+
+    if (crop) {
+      const {
+        height: cropHeight,
+        width: cropWidth,
+        x,
+        y,
+      } = crop;
+
+      vHeight = cropHeight;
+      vWidth = cropWidth;
+      vX = x;
+      vY = y;
+    }
+
+
     return (
-      <g>
+      <g clipPath="url(#svg-editor-cut)">
         {/* invisible rect to determine actual width/height and convert
           stuff to viewBox coordinates */}
         <rect
-          x="0"
-          y="0"
-          height={`${height}`}
-          width={`${width}`}
+          x={`${vX}`}
+          y={`${vY}`}
+          width={`${vWidth}`}
+          height={`${vHeight}`}
           ref={this.referenceRectRef}
           fill="none"
         />
-        {diStrokeWidth && this.props.drawables.map((item) => {
-          switch (item.type) {
-            case 'ellipse':
-              return (
-                <EllipseDrawable
-                  key={item.id}
-                  id={item.id}
-                  rotate={rotate}
-                  cx={item.cx}
-                  cy={item.cy}
-                  rx={item.rx}
-                  ry={item.ry}
-                  fill={item.fill}
-                  stroke={item.stroke}
-                  strokeWidth={item.strokeWidth}
-                  selected={selectedDrawable === item.id}
-                  onSelect={this.handleDrawableSelect}
-                  onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-                  dragIndicatorStrokeWidth={diStrokeWidth}
-                  onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
-                  onRemoveDrawable={this.handleRemoveDrawable}
-                />
-              );
-            case 'line':
-              return (
-                <LineDrawable
-                  key={item.id}
-                  id={item.id}
-                  rotate={rotate}
-                  x1={item.x1}
-                  x2={item.x2}
-                  y1={item.y1}
-                  y2={item.y2}
-                  stroke={item.stroke}
-                  strokeWidth={item.strokeWidth}
-                  selected={selectedDrawable === item.id}
-                  onSelect={this.handleDrawableSelect}
-                  onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-                  dragIndicatorStrokeWidth={diStrokeWidth}
-                  onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
-                  onRemoveDrawable={this.handleRemoveDrawable}
-                />
-              );
-            case 'path':
-              return (
-                <PathDrawable
-                  key={item.id}
-                  id={item.id}
-                  rotate={rotate}
-                  points={item.points}
-                  stroke={item.stroke}
-                  strokeWidth={item.strokeWidth}
-                  selected={selectedDrawable === item.id}
-                  onSelect={this.handleDrawableSelect}
-                  onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-                  dragIndicatorStrokeWidth={diStrokeWidth}
-                  onRemoveDrawable={this.handleRemoveDrawable}
-                />
-              );
-            case 'rect':
-              return (
-                <RectDrawable
-                  key={item.id}
-                  id={item.id}
-                  rotate={rotate}
-                  x={item.x}
-                  y={item.y}
-                  width={item.width}
-                  height={item.height}
-                  fill={item.fill}
-                  stroke={item.stroke}
-                  strokeWidth={item.strokeWidth}
-                  selected={selectedDrawable === item.id}
-                  onSelect={this.handleDrawableSelect}
-                  onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-                  dragIndicatorStrokeWidth={diStrokeWidth}
-                  onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
-                  onRemoveDrawable={this.handleRemoveDrawable}
-                />
-              );
-            default:
-              console.error('item of unknown type could not be drawn', item); // eslint-disable-line no-console
-              return null;
-          }
-        })}
+        {diStrokeWidth
+          && this.props.drawables
+          && this.props.drawables
+            .sort(this.sortBySelected).map((item) => {
+              switch (item.type) {
+                case 'ellipse':
+                  return (
+                    <EllipseDrawable
+                      key={item.id}
+                      id={item.id}
+                      cx={item.cx}
+                      cy={item.cy}
+                      rx={item.rx}
+                      ry={item.ry}
+                      fill={item.fill}
+                      stroke={item.stroke}
+                      strokeWidth={item.strokeWidth}
+                      selected={selectedDrawable === item.id}
+                      onSelect={this.handleDrawableSelect}
+                      onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+                      dragIndicatorStrokeWidth={diStrokeWidth}
+                      onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                    />
+                  );
+                case 'line':
+                  return (
+                    <LineDrawable
+                      key={item.id}
+                      id={item.id}
+                      x1={item.x1}
+                      x2={item.x2}
+                      y1={item.y1}
+                      y2={item.y2}
+                      stroke={item.stroke}
+                      strokeWidth={item.strokeWidth}
+                      selected={selectedDrawable === item.id}
+                      onSelect={this.handleDrawableSelect}
+                      onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+                      dragIndicatorStrokeWidth={diStrokeWidth}
+                      onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                    />
+                  );
+                case 'path':
+                  return (
+                    <PathDrawable
+                      key={item.id}
+                      id={item.id}
+                      points={item.points}
+                      stroke={item.stroke}
+                      strokeWidth={item.strokeWidth}
+                      selected={selectedDrawable === item.id}
+                      onSelect={this.handleDrawableSelect}
+                      onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+                      dragIndicatorStrokeWidth={diStrokeWidth}
+                    />
+                  );
+                case 'rect':
+                  return (
+                    <RectDrawable
+                      key={item.id}
+                      id={item.id}
+                      x={item.x}
+                      y={item.y}
+                      width={item.width}
+                      height={item.height}
+                      fill={item.fill}
+                      stroke={item.stroke}
+                      strokeWidth={item.strokeWidth}
+                      selected={selectedDrawable === item.id}
+                      onSelect={this.handleDrawableSelect}
+                      onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+                      dragIndicatorStrokeWidth={diStrokeWidth}
+                      onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                    />
+                  );
+                default:
+                  console.error('item of unknown type could not be drawn', item); // eslint-disable-line no-console
+                  return null;
+              }
+            })}
       </g>
     );
   }

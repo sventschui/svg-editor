@@ -1,8 +1,8 @@
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent, type Node } from 'react';
 import type { Drawable } from '../drawables';
 
-type Props ={|
+type Props ={
   drawingFill: string,
   drawingStroke: string,
   drawingStrokeWidth: number,
@@ -11,7 +11,11 @@ type Props ={|
   onDrawEnd: (drawable: Drawable) => void,
   minWidth: number,
   minHeight: number,
-|};
+  children?: Node,
+  clipPath?: string,
+  x: number,
+  y: number,
+};
 
 type State = {
   startCoord?: { x: number, y: number } | null,
@@ -72,8 +76,6 @@ export default class ArtboardRect extends PureComponent<Props, State> {
     // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
     const inverseMatrix = artboard.getScreenCTM().inverse();
 
-    console.log({ inverseMatrix });
-
     e.stopPropagation();
 
     const transformPoint = ({ clientX, clientY }) => {
@@ -81,13 +83,6 @@ export default class ArtboardRect extends PureComponent<Props, State> {
       pt.x = clientX;
       pt.y = clientY;
       pt = pt.matrixTransform(inverseMatrix);
-
-      console.log({
-        clientX,
-        clientY,
-        x: pt.x,
-        y: pt.y,
-      });
 
       return { x: pt.x, y: pt.y };
     };
@@ -126,27 +121,35 @@ export default class ArtboardRect extends PureComponent<Props, State> {
     const {
       width,
       height,
+      y,
+      x,
       drawingFill,
       drawingStroke,
       drawingStrokeWidth,
+      children,
+      clipPath,
     } = this.props;
 
     const rectBounds = this.getRectBounds();
 
     return (
-      <Fragment>
+      <g
+        key="artboard"
+        style={artboardStyles}
+        clipPath={clipPath}
+        onMouseDown={this.handleArtboardMouseDown}
+      >
         <rect
           style={artboardStyles}
           pointerEvents="bounding-box"
           key="artboard"
           fill="none"
-          onMouseDown={this.handleArtboardMouseDown}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-          data-artboard="yes"
+          x={`${x}`}
+          y={`${y}`}
+          width={`${width}`}
+          height={`${height}`}
         />
+        {children}
         {rectBounds && (
           <rect
             {...rectBounds}
@@ -155,7 +158,7 @@ export default class ArtboardRect extends PureComponent<Props, State> {
             strokeWidth={drawingStrokeWidth}
           />
         )}
-      </Fragment>
+      </g>
     );
   }
 }
