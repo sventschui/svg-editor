@@ -69,6 +69,7 @@ type Props = {|
     newY: number,
   ) => void,
   drawables: Array<Drawable>,
+  defaultDiStrokeWidth?: number,
 |};
 
 type State = {
@@ -76,11 +77,14 @@ type State = {
 };
 
 export default class Drawables extends PureComponent<Props, State> {
-  state = {
-    diStrokeWidth: null,
-  };
-
   referenceRect: ?Element = null;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      diStrokeWidth: props.defaultDiStrokeWidth || 1,
+    };
+  }
 
   referenceRectRef = (el: ?Element) => {
     this.referenceRect = el;
