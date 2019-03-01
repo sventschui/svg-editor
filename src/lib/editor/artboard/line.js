@@ -1,6 +1,7 @@
 // @flow
 import React, { PureComponent, type Node } from 'react';
 import type { Drawable } from '../drawables';
+import ArtboardBase from './base';
 
 type Props ={
   drawingStroke: string,
@@ -21,8 +22,6 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'all' };
-
 export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
     drawingStroke: 'black',
@@ -33,9 +32,10 @@ export default class ArtboardRect extends PureComponent<Props, State> {
 
   state = {};
 
-  getLinePoints = () => {
-    const { startCoord, currentCoord } = this.state;
-
+  getLinePoints = ({ startCoord, currentCoord }: {
+    startCoord?: { x: number, y: number } | null,
+    currentCoord?: { x: number, y: number } | null,
+  }) => {
     if (!startCoord || !currentCoord) {
       return null;
     }
@@ -60,59 +60,38 @@ export default class ArtboardRect extends PureComponent<Props, State> {
     };
   }
 
-  handleArtboardMouseDown = (e: MouseEvent) => {
-    const artboard = e.currentTarget;
+  onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+    this.setState({ startCoord: start });
+  }
 
-    // $FlowFixMe flow doesn't know currentTarget is of type Element
-    const svg = artboard.closest('svg');
+  onMouseMove = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+  }
 
-    if (!svg) {
-      console.error('svg not found'); // eslint-disable-line no-console
-      return;
+  onMouseUp = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+
+    const linePoints = this.getLinePoints({ startCoord: start, currentCoord: current });
+
+    if (linePoints) {
+      const id = String(Date.now());
+      this.props.onDrawEnd({
+        type: 'line',
+        id,
+        ...linePoints,
+        fill: this.props.drawingFill,
+        stroke: this.props.drawingStroke,
+        strokeWidth: this.props.drawingStrokeWidth,
+      });
     }
-
-    // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
-    const inverseMatrix = artboard.getScreenCTM().inverse();
-
-    e.stopPropagation();
-
-    const transformPoint = ({ clientX, clientY }) => {
-      let pt = svg.createSVGPoint();
-      pt.x = clientX;
-      pt.y = clientY;
-      pt = pt.matrixTransform(inverseMatrix);
-
-      return { x: pt.x, y: pt.y };
-    };
-
-    this.setState({ startCoord: transformPoint(e) });
-
-    const mouseMoveHandler = (e2: MouseEvent) => {
-      this.setState({ currentCoord: transformPoint(e2) });
-    };
-
-    const mouseUpHandler = () => {
-      window.removeEventListener('mousemove', mouseMoveHandler);
-      window.removeEventListener('mouseup', mouseUpHandler);
-
-      const points = this.getLinePoints();
-
-      if (points) {
-        const id = String(Date.now());
-        this.props.onDrawEnd({
-          type: 'line',
-          id,
-          ...points,
-          stroke: this.props.drawingStroke,
-          strokeWidth: this.props.drawingStrokeWidth,
-        });
-      }
-      this.setState({ startCoord: null, currentCoord: null });
-    };
-
-    window.addEventListener('mousemove', mouseMoveHandler);
-    window.addEventListener('mouseup', mouseUpHandler);
-  };
+    this.setState({ startCoord: null, currentCoord: null });
+  }
 
   render() {
     const {
@@ -126,25 +105,19 @@ export default class ArtboardRect extends PureComponent<Props, State> {
       clipPath,
     } = this.props;
 
-    const points = this.getLinePoints();
+    const points = this.getLinePoints(this.state);
 
     return (
-      <g
-        key="artboard"
-        style={artboardStyles}
+      <ArtboardBase
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
+        width={width}
+        height={height}
+        x={x}
+        y={y}
         clipPath={clipPath}
-        onMouseDown={this.handleArtboardMouseDown}
       >
-        <rect
-          style={artboardStyles}
-          pointerEvents="bounding-box"
-          key="artboard"
-          fill="none"
-          x={`${x}`}
-          y={`${y}`}
-          width={`${width}`}
-          height={`${height}`}
-        />
         {children}
         {points && (
           <line
@@ -153,7 +126,7 @@ export default class ArtboardRect extends PureComponent<Props, State> {
             strokeWidth={drawingStrokeWidth}
           />
         )}
-      </g>
+      </ArtboardBase>
     );
   }
 }
