@@ -64,7 +64,7 @@ type State = {
 export default class Editor extends PureComponent<$Exact<Props>, State> {
   referenceRectNoZoom: { current: null | Element } = React.createRef();
 
-  makeZoomAndTranslateStyles = memoize((
+  makeZoomAndTranslateTransform = memoize((
     zoom: number,
     imageWidth: number,
     imageHeight: number,
@@ -104,9 +104,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       matrix[5] += imageWidth + ((imageWidth / 2) * (zoom - 1));
     }
 
-    return {
-      transform: `matrix(${matrix[0]}, ${matrix[1]}, ${matrix[2]}, ${matrix[3]}, ${matrix[4]}, ${matrix[5]})`,
-    };
+    return `matrix(${matrix[0]}, ${matrix[1]}, ${matrix[2]}, ${matrix[3]}, ${matrix[4]}, ${matrix[5]})`;
   });
 
   svgMouseDownHandler = (e: MouseEvent) => {
@@ -290,7 +288,7 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
         />
         {/* the zoomable part of the svg */}
         <g
-          style={this.makeZoomAndTranslateStyles(
+          transform={this.makeZoomAndTranslateTransform(
             zoom,
             imageWidth,
             imageHeight,

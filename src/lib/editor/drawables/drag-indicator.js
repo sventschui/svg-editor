@@ -23,6 +23,11 @@ type Props = {|
   diBottom?: number,
 |};
 
+const deleteIconStyles = {
+  cursor: 'pointer',
+  fill: '#f07662',
+};
+
 export default class DragIndicator extends PureComponent<Props> {
   makeDiStyles = memoize((selected: boolean, strokeWidth: number) => ({
     pointerEvents: 'bounding-box',
@@ -40,7 +45,7 @@ export default class DragIndicator extends PureComponent<Props> {
     stroke: 'none',
   }));
 
-  makeDeleteIconStyles = memoize(
+  makeDeleteIconTransform = memoize(
     (
       rotate: number,
       diTop: number,
@@ -53,30 +58,18 @@ export default class DragIndicator extends PureComponent<Props> {
       const newDiLeft = diLeft - 2;
       const newDiRight = diRight + 2;
 
-      const styles = {
-        cursor: 'pointer',
-        fill: '#f07662',
-        transform: undefined,
-      };
-
       switch (rotate) {
         case 0:
-          styles.transform = `translate(${newDiRight}px, ${newDiBottom}px) rotate(-${rotate}deg)`;
-          break;
+          return `translate(${newDiRight}px, ${newDiBottom}px) rotate(-${rotate}deg)`;
         case 90:
-          styles.transform = `translate(${newDiRight}px, ${newDiTop}px) rotate(-${rotate}deg)`;
-          break;
+          return `translate(${newDiRight}px, ${newDiTop}px) rotate(-${rotate}deg)`;
         case 180:
-          styles.transform = `translate(${newDiLeft}px, ${newDiTop}px) rotate(-${rotate}deg)`;
-          break;
+          return `translate(${newDiLeft}px, ${newDiTop}px) rotate(-${rotate}deg)`;
         case 270:
-          styles.transform = `translate(${newDiLeft}px, ${newDiBottom}px) rotate(-${rotate}deg)`;
-          break;
+          return `translate(${newDiLeft}px, ${newDiBottom}px) rotate(-${rotate}deg)`;
         default:
           throw new Error(`Unknown rotate value ${rotate}`);
       }
-
-      return styles;
     },
   );
 
@@ -118,7 +111,8 @@ export default class DragIndicator extends PureComponent<Props> {
         />
         {onRemoveDrawable && selected && (
           <path
-            style={this.makeDeleteIconStyles(rotate, diTop, diBottom, diRight, diLeft)}
+            transform={this.makeDeleteIconTransform(rotate, diTop, diBottom, diRight, diLeft)}
+            style={deleteIconStyles}
             d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"
             onClick={onRemoveDrawable}
           />

@@ -18,7 +18,7 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'bounding-box' };
+const artboardStyles = { pointerEvents: 'all' };
 
 export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
@@ -72,14 +72,22 @@ export default class ArtboardRect extends PureComponent<Props, State> {
     // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
     const inverseMatrix = artboard.getScreenCTM().inverse();
 
+    console.log({ inverseMatrix });
+
     e.stopPropagation();
 
     const transformPoint = ({ clientX, clientY }) => {
-      // $FlowFixMe flow doesn't know we get an SVG element
       let pt = svg.createSVGPoint();
       pt.x = clientX;
       pt.y = clientY;
       pt = pt.matrixTransform(inverseMatrix);
+
+      console.log({
+        clientX,
+        clientY,
+        x: pt.x,
+        y: pt.y,
+      });
 
       return { x: pt.x, y: pt.y };
     };
@@ -129,6 +137,7 @@ export default class ArtboardRect extends PureComponent<Props, State> {
       <Fragment>
         <rect
           style={artboardStyles}
+          pointerEvents="bounding-box"
           key="artboard"
           fill="none"
           onMouseDown={this.handleArtboardMouseDown}
@@ -136,6 +145,7 @@ export default class ArtboardRect extends PureComponent<Props, State> {
           y={0}
           width={width}
           height={height}
+          data-artboard="yes"
         />
         {rectBounds && (
           <rect

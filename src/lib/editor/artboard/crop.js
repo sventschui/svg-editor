@@ -22,7 +22,7 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'bounding-box' };
+const artboardStyles = { pointerEvents: 'all' };
 
 export default class ArtboardCut extends PureComponent<Props, State> {
   static defaultProps = {
@@ -76,7 +76,6 @@ export default class ArtboardCut extends PureComponent<Props, State> {
     e.stopPropagation();
 
     const transformPoint = ({ clientX, clientY }) => {
-      // $FlowFixMe flow doesn't know we get an SVG element
       let pt = svg.createSVGPoint();
       pt.x = clientX;
       pt.y = clientY;
@@ -121,6 +120,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
       <Fragment>
         <rect
           style={artboardStyles}
+          pointerEvents="bounding-box"
           key="artboard"
           fill="none"
           onMouseDown={this.handleArtboardMouseDown}
