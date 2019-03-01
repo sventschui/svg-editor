@@ -102,14 +102,6 @@ export default class ArtboardCut extends PureComponent<Props, State> {
       >
         {children}
         {rectBounds && (
-          <rect
-            {...rectBounds}
-            fill="none"
-            stroke="blue"
-            strokeWidth="2"
-          />
-        )}
-        {rectBounds && (
           <path
             d={`M0 0 H${width} V${height} H0 Z M${rectBounds.x} ${rectBounds.y} H${rectBounds.x + rectBounds.width} V${rectBounds.y + rectBounds.height} H${rectBounds.x} Z`}
             fillRule="evenodd"
