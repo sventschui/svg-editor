@@ -1,6 +1,6 @@
 {
   "name": "@sventschui/react-svg-editor",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -8,7 +8,9 @@
     "eject": "react-scripts eject",
     "prepare": "rm -rf lib/ && NODE_ENV=production babel -d lib src/lib && flow-copy-source src/lib lib"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "memoize-one": "5.0.0"
   },
