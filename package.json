@@ -8,6 +8,7 @@
     "eject": "react-scripts eject",
     "prepare": "rm -rf lib/ && NODE_ENV=production babel -d lib src/lib && flow-copy-source src/lib lib"
   },
+  "files": ["lib"],
   "dependencies": {
     "memoize-one": "5.0.0"
   },

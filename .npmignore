@@ -1,9 +1,0 @@
-/public/
-/src/
-/.babelrc
-/.eslintrc.json
-/.flowconfig
-/.gitignore
-/*.tgz
-/yarn-error.log
-/yarn.lock

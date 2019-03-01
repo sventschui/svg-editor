@@ -75,6 +75,7 @@ type Props = {|
     newY: number,
   ) => void,
   drawables: Array<Drawable>,
+  defaultDiStrokeWidth?: number,
   crop: ?Crop,
 |};
 
@@ -84,11 +85,14 @@ type State = {
 
 
 export default class Drawables extends PureComponent<Props, State> {
-  state = {
-    diStrokeWidth: null,
-  };
-
   referenceRect: ?Element = null;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+        diStrokeWidth: props.defaultDiStrokeWidth || 1,
+    };
+  }
 
   componentDidMount() {
     window.addEventListener('keydown', this.onWindowKeyPress);
@@ -128,7 +132,6 @@ export default class Drawables extends PureComponent<Props, State> {
       this.setState({ diStrokeWidth: 5 });
     }
   };
-
 
   handleDragIndicatorMouseDown = (e: MouseEvent, id: string) => {
     if (!this.props.canSelectDrawable) {
