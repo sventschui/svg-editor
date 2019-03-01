@@ -253,6 +253,11 @@ export default class Cropables extends PureComponent<Props, State> {
           ref={this.referenceRectRef}
           fill="none"
         />
+        <path
+          d={`M0 0 H${width} V${height} H0 Z M${x} ${y} H${x + cropWidth} V${y + cropHeight} H${x} Z`}
+          fillRule="evenodd"
+          fill="#00000050"
+        />
         <Square
           x={x}
           y={y}

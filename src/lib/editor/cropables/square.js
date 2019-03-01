@@ -44,6 +44,8 @@ export default class RectCrop extends PureComponent<Props> {
     const diWidth = width + diStrokeWidth;
     const diHeight = height + diStrokeWidth;
 
+    console.log('cropable#square');
+
     return (
       <g
         style={{ pointerEvents: 'bounding-box' }}

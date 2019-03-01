@@ -274,8 +274,17 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
             fill="none"
           />
           {/* The canvas (aka artboard) */}
+          {(
+            <rect
+              fill="black"
+              clipPath="url(#svg-editor-cut)"
+              x="0"
+              y="0"
+              height={`${imageHeight}`}
+              width={`${imageWidth}`}
+            />
+          )}
           <image
-            clipPath="url(#svg-editor-cut)"
             xlinkHref={backgroundUrl}
             x="0"
             y="0"

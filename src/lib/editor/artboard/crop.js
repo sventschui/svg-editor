@@ -1,6 +1,6 @@
 // @flow
-import React, { PureComponent, Fragment, type Node } from 'react';
-
+import React, { PureComponent, type Node } from 'react';
+import ArtboardBase from './base';
 
 export type Crop = {
   x: number,
@@ -23,8 +23,6 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'all' };
-
 export default class ArtboardCut extends PureComponent<Props, State> {
   static defaultProps = {
     minWidth: 10,
@@ -33,9 +31,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
 
   state = {};
 
-  getRectBounds = () => {
-    const { startCoord, currentCoord } = this.state;
-
+  getRectBounds = ({ startCoord, currentCoord }) => {
     if (!startCoord || !currentCoord) {
       return null;
     }
@@ -60,54 +56,30 @@ export default class ArtboardCut extends PureComponent<Props, State> {
     };
   }
 
-  handleArtboardMouseDown = (e: MouseEvent) => {
-    const artboard = e.currentTarget;
+  onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+    this.setState({ startCoord: start });
+  }
 
-    // $FlowFixMe flow doesn't know currentTarget is of type Element
-    const svg = artboard.closest('svg');
+  onMouseMove = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+  }
 
-    if (!svg) {
-      console.error('svg not found'); // eslint-disable-line no-console
-      return;
+  onMouseUp = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+
+    const rectBounds = this.getRectBounds({ startCoord: start, currentCoord: current });
+
+    if (rectBounds) {
+      this.props.onCropEnd(rectBounds);
     }
-
-    // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
-    const inverseMatrix = artboard.getScreenCTM().inverse();
-
-    e.stopPropagation();
-
-    const transformPoint = ({ clientX, clientY }) => {
-      let pt = svg.createSVGPoint();
-      pt.x = clientX;
-      pt.y = clientY;
-      pt = pt.matrixTransform(inverseMatrix);
-
-      return { x: pt.x, y: pt.y };
-    };
-
-    this.setState({ startCoord: transformPoint(e) });
-
-    const mouseMoveHandler = (e2: MouseEvent) => {
-      this.setState({ currentCoord: transformPoint(e2) });
-    };
-
-    const mouseUpHandler = () => {
-      window.removeEventListener('mousemove', mouseMoveHandler);
-      window.removeEventListener('mouseup', mouseUpHandler);
-
-      const rectBounds = this.getRectBounds();
-
-      if (rectBounds) {
-        this.props.onCropEnd({
-          ...rectBounds,
-        });
-      }
-      this.setState({ startCoord: null, currentCoord: null });
-    };
-
-    window.addEventListener('mousemove', mouseMoveHandler);
-    window.addEventListener('mouseup', mouseUpHandler);
-  };
+    this.setState({ startCoord: null, currentCoord: null });
+  }
 
   render() {
     const {
@@ -116,21 +88,18 @@ export default class ArtboardCut extends PureComponent<Props, State> {
       children,
     } = this.props;
 
-    const rectBounds = this.getRectBounds();
+    const rectBounds = this.getRectBounds(this.state);
 
     return (
-      <Fragment>
-        <rect
-          style={artboardStyles}
-          pointerEvents="bounding-box"
-          key="artboard"
-          fill="none"
-          onMouseDown={this.handleArtboardMouseDown}
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-        />
+      <ArtboardBase
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
+        width={width}
+        height={height}
+        x={0}
+        y={0}
+      >
         {children}
         {rectBounds && (
           <rect
@@ -140,7 +109,14 @@ export default class ArtboardCut extends PureComponent<Props, State> {
             strokeWidth="2"
           />
         )}
-      </Fragment>
+        {rectBounds && (
+          <path
+            d={`M0 0 H${width} V${height} H0 Z M${rectBounds.x} ${rectBounds.y} H${rectBounds.x + rectBounds.width} V${rectBounds.y + rectBounds.height} H${rectBounds.x} Z`}
+            fillRule="evenodd"
+            fill="#00000050"
+          />
+        )}
+      </ArtboardBase>
     );
   }
 }
