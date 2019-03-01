@@ -56,6 +56,12 @@ export default class LineDrawable extends PureComponent<Props> {
     const diWidth = higherX - lowerX + strokeWidth;
     const diHeight = higherY - lowerY + strokeWidth;
 
+    const isDiHorizontalInverse = lowerX !== x1;
+    const diHorizontalInverse = isDiHorizontalInverse ? -1 : 1;
+
+    const isDiVerticalInverse = lowerY !== y1;
+    const diVerticalInverse = isDiVerticalInverse ? -1 : 1;
+
     return (
       <g>
         <line
@@ -81,11 +87,12 @@ export default class LineDrawable extends PureComponent<Props> {
             diHeight={diHeight}
             diStrokeWidth={diStrokeWidth}
             selected={selected}
-            diLeft={x1}
-            diRight={x2}
-            diTop={y1}
-            diBottom={y2}
-            cursor="move"
+            diLeft={x1 - (strokeWidthHalf * diHorizontalInverse)}
+            diRight={x2 + (strokeWidthHalf * diHorizontalInverse)}
+            diTop={y1 - (strokeWidthHalf * diVerticalInverse)}
+            diBottom={y2 + (strokeWidthHalf * diVerticalInverse)}
+            inverseCursorHorizontal={isDiHorizontalInverse}
+            inverseCursorVertical={isDiVerticalInverse}
           />
         )}
       </g>

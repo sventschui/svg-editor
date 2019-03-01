@@ -19,8 +19,28 @@ type Props = {|
   diRight?: number,
   diTop?: number,
   diBottom?: number,
-  cursor?: string,
+  inverseCursorHorizontal?: boolean,
+  inverseCursorVertical?: boolean,
 |};
+
+function inverseDirection(
+  inverseCursorHorizontal: ?boolean,
+  inverseCursorVertical: ?boolean,
+  direction: 'nw' | 'ne' | 'se' | 'sw',
+): 'nw' | 'ne' | 'se' | 'sw' {
+  let [v, h] = `${direction}`;
+
+  if (inverseCursorVertical) {
+    v = v === 'n' ? 's' : 'n';
+  }
+
+  if (inverseCursorHorizontal) {
+    h = h === 'e' ? 'w' : 'e';
+  }
+
+  // $FlowFixMe
+  return `${v}${h}`;
+}
 
 export default class DragIndicator extends PureComponent<Props> {
   makeDiStyles = memoize((selected: boolean, strokeWidth: number) => ({
@@ -34,11 +54,16 @@ export default class DragIndicator extends PureComponent<Props> {
     // TODO: make stroke dashed
   }));
 
-  makeResizHandleStyles = memoize((selected: boolean, cursor: ?string, direction: 'nw' | 'ne' | 'se' | 'sw') => ({
+  makeResizHandleStyles = memoize((
+    selected: boolean,
+    inverseCursorHorizontal: ?boolean,
+    inverseCursorVertical: ?boolean,
+    direction: 'nw' | 'ne' | 'se' | 'sw',
+  ) => ({
     pointerEvents: 'bounding-box',
     fill: selected ? '#3b3fd8' : 'none',
     stroke: 'none',
-    cursor: cursor || `${direction}-resize`,
+    cursor: `${inverseDirection(inverseCursorHorizontal, inverseCursorVertical, direction)}-resize`,
   }));
 
   render() {
@@ -55,7 +80,8 @@ export default class DragIndicator extends PureComponent<Props> {
       diHeight,
       diStrokeWidth,
       selected,
-      cursor,
+      inverseCursorHorizontal,
+      inverseCursorVertical,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -78,7 +104,7 @@ export default class DragIndicator extends PureComponent<Props> {
         />
         {onResizeHandleTopLeftMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected, cursor, 'nw')}
+            style={this.makeResizHandleStyles(selected, inverseCursorHorizontal, inverseCursorVertical, 'nw')}
             cx={diLeft}
             cy={diTop}
             r={diStrokeWidth}
@@ -88,7 +114,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleTopRightMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected, cursor, 'ne')}
+            style={this.makeResizHandleStyles(selected, inverseCursorHorizontal, inverseCursorVertical, 'ne')}
             cx={diRight}
             cy={diTop}
             r={diStrokeWidth}
@@ -98,7 +124,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleBottomLeftMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected, cursor, 'sw')}
+            style={this.makeResizHandleStyles(selected, inverseCursorHorizontal, inverseCursorVertical, 'sw')}
             cx={diLeft}
             cy={diBottom}
             r={diStrokeWidth}
@@ -108,7 +134,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleBottomRightMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected, cursor, 'se')}
+            style={this.makeResizHandleStyles(selected, inverseCursorHorizontal, inverseCursorVertical, 'se')}
             cx={diRight}
             cy={diBottom}
             r={diStrokeWidth}
