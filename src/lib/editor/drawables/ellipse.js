@@ -51,12 +51,12 @@ export default class EllipseDrawable extends PureComponent<Props> {
       canSelectDrawable,
     } = this.props;
 
-    const diStrokeWidthHalf = diStrokeWidth / 2;
+    const strokeWidthHalf = strokeWidth / 2;
 
-    const diX = cx - rx - diStrokeWidthHalf;
-    const diY = cy - ry - diStrokeWidthHalf;
-    const diWidth = rx * 2 + diStrokeWidth;
-    const diHeight = ry * 2 + diStrokeWidth;
+    const diX = cx - rx - strokeWidthHalf;
+    const diY = cy - ry - strokeWidthHalf;
+    const diWidth = rx * 2 + strokeWidth;
+    const diHeight = ry * 2 + strokeWidth;
 
     return (
       <g>
