@@ -36,13 +36,6 @@ export default class RectCrop extends PureComponent<Props> {
 
     const id = 'svg-editor-cut';
 
-    const diStrokeWidthHalf = diStrokeWidth / 2;
-
-    const diX = x - diStrokeWidthHalf;
-    const diY = y - diStrokeWidthHalf;
-    const diWidth = width + diStrokeWidth;
-    const diHeight = height + diStrokeWidth;
-
     return (
       <g
         style={{ pointerEvents: 'bounding-box' }}
@@ -54,10 +47,10 @@ export default class RectCrop extends PureComponent<Props> {
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}
           onResizeHandleBottomLeftMouseDown={this.handleResizeHandleBottomLeftMouseDown}
           onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
-          diX={diX}
-          diY={diY}
-          diWidth={diWidth}
-          diHeight={diHeight}
+          diX={x}
+          diY={y}
+          diWidth={width}
+          diHeight={height}
           diStrokeWidth={diStrokeWidth}
           selected
         />
