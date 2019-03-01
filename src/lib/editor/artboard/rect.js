@@ -1,6 +1,7 @@
 // @flow
 import React, { PureComponent, type Node } from 'react';
 import type { Drawable } from '../drawables';
+import ArtboardBase from './base';
 
 type Props ={
   drawingFill: string,
@@ -22,8 +23,6 @@ type State = {
   currentCoord?: { x: number, y: number } | null,
 };
 
-const artboardStyles = { pointerEvents: 'all', cursor: 'crosshair' };
-
 export default class ArtboardRect extends PureComponent<Props, State> {
   static defaultProps = {
     drawingFill: 'black',
@@ -35,9 +34,7 @@ export default class ArtboardRect extends PureComponent<Props, State> {
 
   state = {};
 
-  getRectBounds = () => {
-    const { startCoord, currentCoord } = this.state;
-
+  getRectBounds = ({ startCoord, currentCoord }) => {
     if (!startCoord || !currentCoord) {
       return null;
     }
@@ -62,60 +59,38 @@ export default class ArtboardRect extends PureComponent<Props, State> {
     };
   }
 
-  handleArtboardMouseDown = (e: MouseEvent) => {
-    const artboard = e.currentTarget;
+  onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+    this.setState({ startCoord: start });
+  }
 
-    // $FlowFixMe flow doesn't know currentTarget is of type Element
-    const svg = artboard.closest('svg');
+  onMouseMove = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+  }
 
-    if (!svg) {
-      console.error('svg not found'); // eslint-disable-line no-console
-      return;
+  onMouseUp = ({ current, start }: {
+    current: { x: number, y: number },
+    start: { x: number, y: number },
+  }) => {
+    this.setState({ startCoord: start, currentCoord: current });
+
+    const rectBounds = this.getRectBounds({ startCoord: start, currentCoord: current });
+
+    if (rectBounds) {
+      const id = String(Date.now());
+      this.props.onDrawEnd({
+        type: 'rect',
+        id,
+        ...rectBounds,
+        fill: this.props.drawingFill,
+        stroke: this.props.drawingStroke,
+        strokeWidth: this.props.drawingStrokeWidth,
+      });
     }
-
-    // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
-    const inverseMatrix = artboard.getScreenCTM().inverse();
-
-    e.stopPropagation();
-
-    const transformPoint = ({ clientX, clientY }) => {
-      let pt = svg.createSVGPoint();
-      pt.x = clientX;
-      pt.y = clientY;
-      pt = pt.matrixTransform(inverseMatrix);
-
-      return { x: pt.x, y: pt.y };
-    };
-
-    this.setState({ startCoord: transformPoint(e) });
-
-    const mouseMoveHandler = (e2: MouseEvent) => {
-      this.setState({ currentCoord: transformPoint(e2) });
-    };
-
-    const mouseUpHandler = () => {
-      window.removeEventListener('mousemove', mouseMoveHandler);
-      window.removeEventListener('mouseup', mouseUpHandler);
-
-      const rectBounds = this.getRectBounds();
-
-      if (rectBounds) {
-        const id = String(Date.now());
-        this.props.onDrawEnd({
-          type: 'rect',
-          id,
-          ...rectBounds,
-          fill: this.props.drawingFill,
-          stroke: this.props.drawingStroke,
-          strokeWidth: this.props.drawingStrokeWidth,
-        });
-      }
-      this.setState({ startCoord: null, currentCoord: null });
-    };
-
-    window.addEventListener('mousemove', mouseMoveHandler);
-    window.addEventListener('mouseup', mouseUpHandler);
-  };
+    this.setState({ startCoord: null, currentCoord: null });
+  }
 
   render() {
     const {
@@ -130,35 +105,30 @@ export default class ArtboardRect extends PureComponent<Props, State> {
       clipPath,
     } = this.props;
 
-    const rectBounds = this.getRectBounds();
+    const rectBounds = this.getRectBounds(this.state);
 
     return (
-      <g
-        key="artboard"
-        style={artboardStyles}
+      <ArtboardBase
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
+        width={width}
+        height={height}
+        x={x}
+        y={y}
         clipPath={clipPath}
-        onMouseDown={this.handleArtboardMouseDown}
       >
-        <rect
-          style={artboardStyles}
-          pointerEvents="bounding-box"
-          key="artboard"
-          fill="none"
-          x={`${x}`}
-          y={`${y}`}
-          width={`${width}`}
-          height={`${height}`}
-        />
         {children}
         {rectBounds && (
           <rect
+            key="rect"
             {...rectBounds}
             fill={drawingFill}
             stroke={drawingStroke}
             strokeWidth={drawingStrokeWidth}
           />
         )}
-      </g>
+      </ArtboardBase>
     );
   }
 }

@@ -1,10 +1,9 @@
 // @flow
-import React, { type Node } from 'react';
+import React, { Fragment, type Node } from 'react';
 import ArtboardPen from './pen';
 import ArtboardRect from './rect';
 import ArtboardEllipse from './ellipse';
 import ArtboardLine from './line';
-import ArtboardDefault from './default';
 import ArtboardCrop from './crop';
 
 type Crop = {
@@ -25,7 +24,6 @@ type Props = {
   x?: number,
   y?: number,
 };
-
 
 const ArtboardComponent = ({
   drawMode,
@@ -80,10 +78,19 @@ const ArtboardComponent = ({
       Artboard = ArtboardLine;
       break;
     case 'crop':
-      Artboard = crop ? ArtboardDefault : ArtboardCrop;
+      //  render cropping artboard only if not yet cropped
+      if (!crop) {
+        Artboard = ArtboardCrop;
+      }
       break;
     default:
-      Artboard = ArtboardDefault;
+      if (drawMode) {
+        console.warn('Unknown drawMode', drawMode); // eslint-disable-line
+      }
+  }
+
+  if (!Artboard) {
+    return <Fragment>{props.children}</Fragment>;
   }
 
   return (
