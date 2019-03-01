@@ -29,14 +29,11 @@ type Props = {|
     newY: number,
   ) => void,
   onConfirmCrop?: () => void,
-  crop: ?Crop
+  crop: ?Crop,
+  diStrokeWidth: number,
 |};
 
-type State = {
-  diStrokeWidth: ?number,
-};
-
-export default class Cropables extends PureComponent<Props, State> {
+export default class Cropables extends PureComponent<Props> {
   referenceRect: ?Element = null;
 
   componentDidMount() {
@@ -68,7 +65,10 @@ export default class Cropables extends PureComponent<Props, State> {
       if (onConfirmCrop && event.key === 'Enter') {
         onConfirmCrop();
       }
-      if (onRemoveCrop && (event.key === 'Backspace' || event.key === 'Delete')) {
+      if (onRemoveCrop && (event.key === 'Backspace'
+        || event.key === 'Delete'
+        || event.key === 'Escape'
+        || event.key === 'Esc')) {
         onRemoveCrop();
       }
     }
@@ -228,6 +228,7 @@ export default class Cropables extends PureComponent<Props, State> {
       width,
       crop,
       canTransformCrop,
+      diStrokeWidth,
     } = this.props;
 
     if (!crop) {
@@ -242,31 +243,33 @@ export default class Cropables extends PureComponent<Props, State> {
     } = crop;
 
     return (
-      <g>
-        {/* invisible rect to determine actual width/height and convert
-          stuff to viewBox coordinates */}
-        <rect
-          x="0"
-          y="0"
-          height={`${height}`}
-          width={`${width}`}
-          ref={this.referenceRectRef}
-          fill="none"
-        />
+      <g
+        style={{ pointerEvents: 'none' }}
+      >
         <path
           d={`M0 0 H${width} V${height} H0 Z M${x} ${y} H${x + cropWidth} V${y + cropHeight} H${x} Z`}
           fillRule="evenodd"
-          fill="#00000050"
+          fill="#00000085"
         />
-        <Square
-          x={x}
-          y={y}
-          height={cropHeight}
-          width={cropWidth}
-          active={canTransformCrop}
-          onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-          onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+        <rect
+          ref={this.referenceRectRef}
+          x="0"
+          y="0"
+          width={`${width}`}
+          height={`${height}`}
+          fill="none"
         />
+        {canTransformCrop && (
+          <Square
+            x={x}
+            y={y}
+            height={cropHeight}
+            width={cropWidth}
+            diStrokeWidth={diStrokeWidth}
+            onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+            onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+          />
+        )}
       </g>
     );
   }

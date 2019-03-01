@@ -11,27 +11,19 @@ type Props ={
   height: number,
   children: Node,
   onDrawEnd: (drawable: Drawable) => void,
+  onDrawStart: () => void,
   minWidth: number,
   minHeight: number,
-  clipPath?: string,
-  x: number,
-  y: number,
 };
 
+type Coords = { x: number, y: number };
+
 type State = {
-  startCoord?: { x: number, y: number } | null,
-  currentCoord?: { x: number, y: number } | null,
+  startCoord?: Coords | null,
+  currentCoord?: Coords | null,
 };
 
 export default class ArtboardEllipse extends PureComponent<Props, State> {
-  static defaultProps = {
-    drawingFill: 'black',
-    drawingStroke: 'none',
-    drawingStrokeWidth: 0,
-    minWidth: 10,
-    minHeight: 10,
-  }
-
   state = {};
 
   getEllipseBounds = () => {
@@ -62,20 +54,21 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
     };
   }
 
-  onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+  onMouseDown = ({ start }: { start: Coords }) => {
+    this.props.onDrawStart();
     this.setState({ startCoord: start });
   }
 
   onMouseMove = ({ current, start }: {
-    current: { x: number, y: number },
-    start: { x: number, y: number },
+    current: Coords,
+    start: Coords,
   }) => {
     this.setState({ startCoord: start, currentCoord: current });
   }
 
   onMouseUp = ({ current, start }: {
-    current: { x: number, y: number },
-    start: { x: number, y: number },
+    current: Coords,
+    start: Coords,
   }) => {
     this.setState({ startCoord: start, currentCoord: current });
 
@@ -99,13 +92,10 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
     const {
       width,
       height,
-      x,
-      y,
       drawingFill,
       drawingStroke,
       drawingStrokeWidth,
       children,
-      clipPath,
     } = this.props;
 
     const ellipseBounds = this.getEllipseBounds();
@@ -117,9 +107,6 @@ export default class ArtboardEllipse extends PureComponent<Props, State> {
         onMouseUp={this.onMouseUp}
         width={width}
         height={height}
-        x={x}
-        y={y}
-        clipPath={clipPath}
       >
         {children}
         {ellipseBounds && (

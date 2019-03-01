@@ -11,6 +11,7 @@ type Props = {|
   onSelect: (e: MouseEvent, id: string) => void,
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
+  canSelectDrawable: boolean,
 |};
 
 export default class PathDrawable extends PureComponent<Props> {
@@ -30,6 +31,7 @@ export default class PathDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      canSelectDrawable,
     } = this.props;
 
     // guard against corrupt data
@@ -50,27 +52,28 @@ export default class PathDrawable extends PureComponent<Props> {
     const diHeight = highestY - lowestY + diStrokeWidth;
 
     return (
-      <g
-        style={{ pointerEvents: 'bounding-box' }}
-        data-id={id}
-        onClick={this.handleClick}
-      >
+      <g>
         <path
           d={`M ${points.map(p => `${p.x} ${p.y}`).join('L')}`}
           fill="none"
           strokeWidth={strokeWidth}
           stroke={stroke}
+          onClick={this.handleClick}
+          pointerEvents="visible-painted"
+          style={{ cursor: canSelectDrawable ? 'pointer' : undefined }}
         />
-        <DragIndicator
-          id={id}
-          onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-          diX={diX}
-          diY={diY}
-          diWidth={diWidth}
-          diHeight={diHeight}
-          diStrokeWidth={diStrokeWidth}
-          selected={selected}
-        />
+        {selected && (
+          <DragIndicator
+            id={id}
+            onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+            diX={diX}
+            diY={diY}
+            diWidth={diWidth}
+            diHeight={diHeight}
+            diStrokeWidth={diStrokeWidth}
+            selected={selected}
+          />
+        )}
       </g>
     );
   }

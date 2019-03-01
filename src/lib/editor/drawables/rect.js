@@ -16,6 +16,7 @@ type Props = {|
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
   onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
+  canSelectDrawable: boolean,
 |};
 
 export default class RectDrawable extends PureComponent<Props> {
@@ -47,14 +48,15 @@ export default class RectDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      canSelectDrawable,
     } = this.props;
 
-    const diStrokeWidthHalf = diStrokeWidth / 2;
+    const strokeWidthHalf = strokeWidth / 2;
 
-    const diX = x - diStrokeWidthHalf;
-    const diY = y - diStrokeWidthHalf;
-    const diWidth = width + diStrokeWidth;
-    const diHeight = height + diStrokeWidth;
+    const diX = x - strokeWidthHalf;
+    const diY = y - strokeWidthHalf;
+    const diWidth = width + strokeWidth;
+    const diHeight = height + strokeWidth;
 
     return (
       <g
@@ -70,21 +72,23 @@ export default class RectDrawable extends PureComponent<Props> {
           fill={fill}
           stroke={stroke}
           strokeWidth={strokeWidth}
+          style={{ cursor: canSelectDrawable ? 'pointer' : undefined }}
         />
-        {selected && (<DragIndicator
-          id={id}
-          onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-          onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
-          onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}
-          onResizeHandleBottomLeftMouseDown={this.handleResizeHandleBottomLeftMouseDown}
-          onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
-          diX={diX}
-          diY={diY}
-          diWidth={diWidth}
-          diHeight={diHeight}
-          diStrokeWidth={diStrokeWidth}
-          selected={selected}
-        />
+        {selected && (
+          <DragIndicator
+            id={id}
+            onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+            onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
+            onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}
+            onResizeHandleBottomLeftMouseDown={this.handleResizeHandleBottomLeftMouseDown}
+            onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
+            diX={diX}
+            diY={diY}
+            diWidth={diWidth}
+            diHeight={diHeight}
+            diStrokeWidth={diStrokeWidth}
+            selected={selected}
+          />
         )}
       </g>
     );

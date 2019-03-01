@@ -6,9 +6,6 @@ type Props ={
   height: number,
   children: Node,
   children?: Node,
-  clipPath?: string,
-  x: number,
-  y: number,
   onMouseDown: ({ start: { x: number, y: number } }, MouseEvent) => void,
   onMouseMove: ({
       start: { x: number, y: number },
@@ -22,7 +19,7 @@ type Props ={
 
 const artboardStyles = { pointerEvents: 'all', cursor: 'crosshair' };
 
-export default class ArtboardBase extends PureComponent<Props, State> {
+export default class ArtboardBase extends PureComponent<Props> {
   handleArtboardMouseDown = (e: MouseEvent) => {
     const artboard = e.currentTarget;
 
@@ -70,26 +67,19 @@ export default class ArtboardBase extends PureComponent<Props, State> {
     const {
       width,
       height,
-      x,
-      y,
       children,
-      clipPath,
     } = this.props;
 
     return (
-      <g
-        key="artboard"
-        style={artboardStyles}
-        clipPath={clipPath}
-        onMouseDown={this.handleArtboardMouseDown}
-      >
+      <g>
         <rect
           style={artboardStyles}
+          onMouseDown={this.handleArtboardMouseDown}
           pointerEvents="bounding-box"
           key="artboard"
           fill="none"
-          x={`${x}`}
-          y={`${y}`}
+          x="0"
+          y="0"
           width={`${width}`}
           height={`${height}`}
         />

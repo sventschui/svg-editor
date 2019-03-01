@@ -17,6 +17,7 @@ import Cropable, { type Crop } from './lib/editor/cropables';
 import Artboard from './lib/editor/artboard';
 import resizeDrawable from './lib/editor/drawables/resize';
 import translateDrawable from './lib/editor/drawables/translate';
+import { PixelRatioContext } from './lib/editor';
 
 type State = {
   drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line' | 'crop',
@@ -203,6 +204,7 @@ export default class App extends PureComponent<{}, State> {
 
       return {
         drawables,
+        selectedDrawable: drawable.id,
       };
     });
   }
@@ -242,6 +244,14 @@ export default class App extends PureComponent<{}, State> {
     this.setState({
       crop: null,
     });
+  }
+
+  onDrawStart = () => {
+    this.setState({ selectedDrawable: null });
+  }
+
+  onCropStart = () => {
+    this.setState({ selectedDrawable: null });
   }
 
   handleResizeCrop = (
@@ -364,41 +374,50 @@ export default class App extends PureComponent<{}, State> {
                 rotate={rotation}
                 canvasSytle={canvasStyle}
               >
-                <Cropable
-                  width={source.width}
-                  height={source.height}
-                  crop={crop}
-                  canTransformCrop={drawMode === 'crop' && !!crop}
-                  onResizeCrop={this.handleResizeCrop}
-                  onCropTranslate={this.handleCropTranslate}
-                  onRemoveCrop={this.handleRemoveCrop}
-                  onConfirmCrop={this.handleConfirmCrop}
-                />
-                <Artboard
-                  drawMode={drawMode}
-                  width={source.width}
-                  height={source.height}
-                  crop={crop}
-                  onDrawEnd={this.handleDrawEnd}
-                  onCropEnd={this.handleCropEnd}
-                  drawingFill={fillColor}
-                  drawingStroke={strokeColor}
-                  drawingStrokeWidth={strokeWidth}
-                >
-                  <Drawables
-                    crop={crop}
-                    width={source.width}
-                    height={source.height}
-                    drawables={drawables}
-                    onSelectDrawable={this.handleSelectDrawable}
-                    canSelectDrawable={drawMode !== null}
-                    selectedDrawable={selectedDrawable}
-                    onResizeDrawable={this.handleResizeDrawable}
-                    onDrawableTranslate={this.handleDrawableTranslate}
-                    onRemoveDrawable={this.handleRemoveDrawable}
-                  />
-                </Artboard>
-
+                <PixelRatioContext.Consumer>
+                  {(pixelRatio: number) => (
+                    <Fragment>
+                      <Artboard
+                        key="artboard"
+                        drawMode={drawMode}
+                        width={source.width}
+                        height={source.height}
+                        onDrawEnd={this.handleDrawEnd}
+                        onCropEnd={this.handleCropEnd}
+                        drawingFill={fillColor}
+                        drawingStroke={strokeColor}
+                        drawingStrokeWidth={strokeWidth}
+                        onDrawStart={this.onDrawStart}
+                        onCropStart={this.onCropStart}
+                      >
+                        <Drawables
+                          diStrokeWidth={5 * pixelRatio}
+                          drawables={drawables}
+                          onSelectDrawable={this.handleSelectDrawable}
+                          canSelectDrawable={drawMode !== null && drawMode !== 'crop'}
+                          selectedDrawable={selectedDrawable}
+                          onResizeDrawable={this.handleResizeDrawable}
+                          onDrawableTranslate={this.handleDrawableTranslate}
+                          onRemoveDrawable={this.handleRemoveDrawable}
+                          width={source.width}
+                          height={source.height}
+                        />
+                        <Cropable
+                          key="cropable"
+                          diStrokeWidth={5 * pixelRatio}
+                          width={source.width}
+                          height={source.height}
+                          crop={crop}
+                          canTransformCrop={drawMode === 'crop' && !!crop}
+                          onResizeCrop={this.handleResizeCrop}
+                          onCropTranslate={this.handleCropTranslate}
+                          onRemoveCrop={this.handleRemoveCrop}
+                          onConfirmCrop={this.handleConfirmCrop}
+                        />
+                      </Artboard>
+                    </Fragment>
+                  )}
+                </PixelRatioContext.Consumer>
               </UncontrolledEditor>
             </div>
           );

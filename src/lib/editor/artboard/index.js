@@ -6,65 +6,21 @@ import ArtboardEllipse from './ellipse';
 import ArtboardLine from './line';
 import ArtboardCrop from './crop';
 
-type Crop = {
-  x: number,
-  y: number,
-  height: number,
-  width: number,
-}
-
 type Props = {
   drawMode: null | 'pen' | 'rect' | 'ellipse' | 'line' | 'crop',
-  crop: ?Crop,
   height: number,
   width: number,
   children: Node,
   onCropEnd: Function,
   onDrawEnd: Function,
-  x?: number,
-  y?: number,
+  onDrawStart: () => void,
+  onCropStart: () => void,
 };
 
-const ArtboardComponent = ({
-  drawMode,
-  crop,
-  height,
-  width,
-  ...rest
-}: Props) => {
-  let vHeight = height;
-  let vWidth = width;
-  let vX = 0;
-  let vY = 0;
-  let clipPath;
-
-  if (crop) {
-    clipPath = 'url(#svg-editor-cut)';
-    const {
-      height: cropHeight,
-      width: cropWidth,
-      x,
-      y,
-    } = crop;
-
-    vHeight = cropHeight;
-    vWidth = cropWidth;
-    vX = x;
-    vY = y;
-  }
-
-  const props = {
-    ...rest,
-    clipPath,
-    width: vWidth,
-    height: vHeight,
-    x: vX,
-    y: vY,
-  };
-
+const ArtboardComponent = (props: Props) => {
   let Artboard;
 
-  switch (drawMode) {
+  switch (props.drawMode) {
     case 'pen':
       Artboard = ArtboardPen;
       break;
@@ -78,14 +34,11 @@ const ArtboardComponent = ({
       Artboard = ArtboardLine;
       break;
     case 'crop':
-      //  render cropping artboard only if not yet cropped
-      if (!crop) {
-        Artboard = ArtboardCrop;
-      }
+      Artboard = ArtboardCrop;
       break;
     default:
-      if (drawMode) {
-        console.warn('Unknown drawMode', drawMode); // eslint-disable-line
+      if (props.drawMode) {
+        console.warn('Unknown drawMode', props.drawMode); // eslint-disable-line
       }
   }
 
@@ -94,6 +47,7 @@ const ArtboardComponent = ({
   }
 
   return (
+    // $FlowFixMe #yolor
     <Artboard
       {...props}
     />

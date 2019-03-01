@@ -7,9 +7,9 @@ type Props = {|
   y: number,
   width: number,
   height: number,
-  active: boolean,
   onDragIndicatorMouseDown: (e: MouseEvent) => void,
   onResizeHandleMouseDown: (e: MouseEvent, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
+  diStrokeWidth: number,
 |};
 
 export default class RectCrop extends PureComponent<Props> {
@@ -31,11 +31,10 @@ export default class RectCrop extends PureComponent<Props> {
       y,
       width,
       height,
-      active,
+      diStrokeWidth,
     } = this.props;
 
     const id = 'svg-editor-cut';
-    const diStrokeWidth = 2;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
 
@@ -44,23 +43,10 @@ export default class RectCrop extends PureComponent<Props> {
     const diWidth = width + diStrokeWidth;
     const diHeight = height + diStrokeWidth;
 
-    console.log('cropable#square');
-
     return (
       <g
         style={{ pointerEvents: 'bounding-box' }}
-        data-id={id}
       >
-
-        <clipPath id={id}>
-          <rect
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-          />
-        </clipPath>
-
         <DragIndicator
           id={id}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
@@ -73,7 +59,7 @@ export default class RectCrop extends PureComponent<Props> {
           diWidth={diWidth}
           diHeight={diHeight}
           diStrokeWidth={diStrokeWidth}
-          selected={active}
+          selected
         />
       </g>
     );

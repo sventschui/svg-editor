@@ -14,7 +14,8 @@ type Props = {|
   onSelect: (e: MouseEvent, id: string) => void,
   onDragIndicatorMouseDown: (e: MouseEvent, id: string) => void,
   dragIndicatorStrokeWidth: number,
-  onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void
+  onResizeHandleMouseDown: (e: MouseEvent, id: string, handleX: 'left' | 'right', handleY: 'top' | 'bottom') => void,
+  canSelectDrawable: boolean,
 |};
 
 export default class LineDrawable extends PureComponent<Props> {
@@ -41,42 +42,52 @@ export default class LineDrawable extends PureComponent<Props> {
       strokeWidth,
       selected,
       dragIndicatorStrokeWidth: diStrokeWidth,
+      canSelectDrawable,
     } = this.props;
 
-    const diStrokeWidthHalf = diStrokeWidth / 2;
+    const strokeWidthHalf = strokeWidth / 2;
 
     const lowerX = Math.min(x1, x2);
     const higherX = Math.max(x1, x2);
     const lowerY = Math.min(y1, y2);
     const higherY = Math.max(y1, y2);
-    const diX = lowerX - diStrokeWidthHalf;
-    const diY = lowerY - diStrokeWidthHalf;
-    const diWidth = higherX - lowerX + diStrokeWidth;
-    const diHeight = higherY - lowerY + diStrokeWidth;
+    const diX = lowerX - strokeWidthHalf;
+    const diY = lowerY - strokeWidthHalf;
+    const diWidth = higherX - lowerX + strokeWidth;
+    const diHeight = higherY - lowerY + strokeWidth;
 
     return (
-      <g
-        style={{ pointerEvents: 'bounding-box' }}
-        data-id={id}
-        onClick={this.handleClick}
-      >
-        <line x1={x1} x2={x2} y1={y1} y2={y2} stroke={stroke} strokeWidth={strokeWidth} />
-        <DragIndicator
-          id={id}
-          onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
-          onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
-          onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
-          diX={diX}
-          diY={diY}
-          diWidth={diWidth}
-          diHeight={diHeight}
-          diStrokeWidth={diStrokeWidth}
-          selected={selected}
-          diLeft={x1}
-          diRight={x2}
-          diTop={y1}
-          diBottom={y2}
+      <g>
+        <line
+          x1={x1}
+          x2={x2}
+          y1={y1}
+          y2={y2}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+          onClick={this.handleClick}
+          pointerEvents="visible-painted"
+          style={{ cursor: canSelectDrawable ? 'pointer' : undefined }}
         />
+        {selected && (
+          <DragIndicator
+            id={id}
+            onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
+            onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
+            onResizeHandleBottomRightMouseDown={this.handleResizeHandleBottomRightMouseDown}
+            diX={diX}
+            diY={diY}
+            diWidth={diWidth}
+            diHeight={diHeight}
+            diStrokeWidth={diStrokeWidth}
+            selected={selected}
+            diLeft={x1}
+            diRight={x2}
+            diTop={y1}
+            diBottom={y2}
+            cursor="move"
+          />
+        )}
       </g>
     );
   }

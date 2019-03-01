@@ -40,11 +40,16 @@ export type Props = {
 };
 
 type State = {
+  heightRatio: number,
   // selectedItem?: string | null,
   // drawingPoints?: Array<DrawingPoint> | null,
 };
 
+export const PixelRatioContext: React$Context<number> = React.createContext(1);
+
 export default class Editor extends PureComponent<$Exact<Props>, State> {
+  referenceRectZoom: { current: null | Element } = React.createRef();
+
   referenceRectNoZoom: { current: null | Element } = React.createRef();
 
   makeZoomAndTranslateTransform = memoize((
@@ -90,10 +95,37 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
     return `matrix(${matrix[0]}, ${matrix[1]}, ${matrix[2]}, ${matrix[3]}, ${matrix[4]}, ${matrix[5]})`;
   });
 
-  makeCanvasSytle = memoize((base, allowDrag) => ({
+  makeCanvasSytle = memoize((base: Object, allowDrag: boolean) => ({
     cursor: allowDrag ? 'move' : null,
     ...base,
   }));
+
+  constructor(props: $Exact<Props>) {
+    super(props);
+    this.state = { heightRatio: 1 };
+    window.addEventListener('resize', this.recalcPixelRatio);
+  }
+
+  componentDidMount() {
+    this.recalcPixelRatio();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.recalcPixelRatio);
+  }
+
+  recalcPixelRatio = () => {
+    const { current: referenceRectZoom } = this.referenceRectZoom;
+
+    if (!referenceRectZoom) {
+      console.log('Missing referenceRectZoom, can\'t calc pixelRatio...'); // eslint-disable-line no-console
+      return;
+    }
+
+    this.setState({
+      heightRatio: this.props.height / referenceRectZoom.getBoundingClientRect().height,
+    });
+  }
 
   svgMouseDownHandler = (e: MouseEvent) => {
     if (this.props.allowDrag) {
@@ -192,6 +224,9 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       drawMode,
       allowDrag,
     } = this.props;
+    const {
+      heightRatio,
+    } = this.state;
 
     let width: number;
     let height: number;
@@ -202,7 +237,6 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       width = imageWidth;
       height = imageHeight;
     }
-
 
     let vHeight = height;
     let vWidth = width;
@@ -222,7 +256,6 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
       vX = x;
       vY = y;
     }
-
 
     return (
       <svg
@@ -266,32 +299,17 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
             rotate,
           )}
         >
-          <rect
-            x={`${vX}`}
-            y={`${vY}`}
-            width={`${vWidth}`}
-            height={`${vHeight}`}
-            fill="none"
-          />
-          {/* The canvas (aka artboard) */}
-          {(
-            <rect
-              fill="black"
-              clipPath="url(#svg-editor-cut)"
-              x="0"
-              y="0"
-              height={`${imageHeight}`}
-              width={`${imageWidth}`}
-            />
-          )}
           <image
             xlinkHref={backgroundUrl}
             x="0"
             y="0"
             height={`${imageHeight}`}
             width={`${imageWidth}`}
+            ref={this.referenceRectZoom}
           />
-          {this.props.children}
+          <PixelRatioContext.Provider value={heightRatio / zoom}>
+            {this.props.children}
+          </PixelRatioContext.Provider>
         </g>
       </svg>
     );

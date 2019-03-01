@@ -19,6 +19,7 @@ type Props = {|
   diRight?: number,
   diTop?: number,
   diBottom?: number,
+  cursor?: string,
 |};
 
 export default class DragIndicator extends PureComponent<Props> {
@@ -29,13 +30,15 @@ export default class DragIndicator extends PureComponent<Props> {
     strokeWidth,
     strokeDasharray: `${strokeWidth * 2} ${strokeWidth}`,
     animation: 'dash 5s linear forwards infinite',
+    cursor: 'move',
     // TODO: make stroke dashed
   }));
 
-  makeResizHandleStyles = memoize((selected: boolean) => ({
+  makeResizHandleStyles = memoize((selected: boolean, cursor: ?string, direction: 'nw' | 'ne' | 'se' | 'sw') => ({
     pointerEvents: 'bounding-box',
     fill: selected ? '#3b3fd8' : 'none',
     stroke: 'none',
+    cursor: cursor || `${direction}-resize`,
   }));
 
   render() {
@@ -52,6 +55,7 @@ export default class DragIndicator extends PureComponent<Props> {
       diHeight,
       diStrokeWidth,
       selected,
+      cursor,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -74,7 +78,7 @@ export default class DragIndicator extends PureComponent<Props> {
         />
         {onResizeHandleTopLeftMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected)}
+            style={this.makeResizHandleStyles(selected, cursor, 'nw')}
             cx={diLeft}
             cy={diTop}
             r={diStrokeWidth}
@@ -84,7 +88,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleTopRightMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected)}
+            style={this.makeResizHandleStyles(selected, cursor, 'ne')}
             cx={diRight}
             cy={diTop}
             r={diStrokeWidth}
@@ -94,7 +98,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleBottomLeftMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected)}
+            style={this.makeResizHandleStyles(selected, cursor, 'sw')}
             cx={diLeft}
             cy={diBottom}
             r={diStrokeWidth}
@@ -104,7 +108,7 @@ export default class DragIndicator extends PureComponent<Props> {
         )}
         {onResizeHandleBottomRightMouseDown && (
           <circle
-            style={this.makeResizHandleStyles(selected)}
+            style={this.makeResizHandleStyles(selected, cursor, 'se')}
             cx={diRight}
             cy={diBottom}
             r={diStrokeWidth}

@@ -10,9 +10,7 @@ type Props ={
   height: number,
   children: Node,
   onDrawEnd: (drawable: Drawable) => void,
-  clipPath?: string,
-  x: number,
-  y: number,
+  onDrawStart: () => void,
 };
 
 type State = {
@@ -20,14 +18,10 @@ type State = {
 };
 
 export default class ArtboardPen extends PureComponent<Props, State> {
-  static defaultProps = {
-    drawingStroke: 'black',
-    drawingStrokeWidth: 5,
-  }
-
   state = {};
 
   onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+    this.props.onDrawStart();
     this.setState({ drawingPoints: [start] });
   }
 
@@ -35,7 +29,7 @@ export default class ArtboardPen extends PureComponent<Props, State> {
     current: { x: number, y: number },
   }) => {
     this.setState((state) => {
-      const copy = state.drawingPoints.slice();
+      const copy = state.drawingPoints ? state.drawingPoints.slice() : [];
       copy.push(current);
       return { drawingPoints: copy };
     });
@@ -46,7 +40,7 @@ export default class ArtboardPen extends PureComponent<Props, State> {
     start: { x: number, y: number },
   }) => {
     this.setState((state) => {
-      const points = state.drawingPoints.slice();
+      const points = state.drawingPoints ? state.drawingPoints.slice() : [];
       points.push(current);
 
       const id = String(Date.now());
@@ -66,12 +60,9 @@ export default class ArtboardPen extends PureComponent<Props, State> {
     const {
       width,
       height,
-      x,
-      y,
       drawingStroke,
       drawingStrokeWidth,
       children,
-      clipPath,
     } = this.props;
 
     const {
@@ -85,9 +76,6 @@ export default class ArtboardPen extends PureComponent<Props, State> {
         onMouseUp={this.onMouseUp}
         width={width}
         height={height}
-        x={x}
-        y={y}
-        clipPath={clipPath}
       >
         {children}
         {drawingPoints && (

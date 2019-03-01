@@ -13,25 +13,26 @@ type Props = {
   width: number,
   height: number,
   onCropEnd: (crop: Crop) => void,
+  onCropStart: () => void,
   minWidth: number,
   minHeight: number,
   children: Node,
 };
 
+type Coords = { x: number, y: number };
+
 type State = {
-  startCoord?: { x: number, y: number } | null,
-  currentCoord?: { x: number, y: number } | null,
+  startCoord?: Coords | null,
+  currentCoord?: Coords | null,
 };
 
 export default class ArtboardCut extends PureComponent<Props, State> {
-  static defaultProps = {
-    minWidth: 10,
-    minHeight: 10,
-  }
-
   state = {};
 
-  getRectBounds = ({ startCoord, currentCoord }) => {
+  getRectBounds = ({ startCoord, currentCoord }: {
+    startCoord: ?Coords,
+    currentCoord: ?Coords,
+  }) => {
     if (!startCoord || !currentCoord) {
       return null;
     }
@@ -56,20 +57,21 @@ export default class ArtboardCut extends PureComponent<Props, State> {
     };
   }
 
-  onMouseDown = ({ start }: { start: { x: number, y: number } }) => {
+  onMouseDown = ({ start }: { start: Coords }) => {
+    this.props.onCropStart();
     this.setState({ startCoord: start });
   }
 
   onMouseMove = ({ current, start }: {
-    current: { x: number, y: number },
-    start: { x: number, y: number },
+    current: Coords,
+    start: Coords,
   }) => {
     this.setState({ startCoord: start, currentCoord: current });
   }
 
   onMouseUp = ({ current, start }: {
-    current: { x: number, y: number },
-    start: { x: number, y: number },
+    current: Coords,
+    start: Coords,
   }) => {
     this.setState({ startCoord: start, currentCoord: current });
 
@@ -97,8 +99,6 @@ export default class ArtboardCut extends PureComponent<Props, State> {
         onMouseUp={this.onMouseUp}
         width={width}
         height={height}
-        x={0}
-        y={0}
       >
         {children}
         {rectBounds && (
@@ -113,7 +113,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
           <path
             d={`M0 0 H${width} V${height} H0 Z M${rectBounds.x} ${rectBounds.y} H${rectBounds.x + rectBounds.width} V${rectBounds.y + rectBounds.height} H${rectBounds.x} Z`}
             fillRule="evenodd"
-            fill="#00000050"
+            fill="#00000070"
           />
         )}
       </ArtboardBase>

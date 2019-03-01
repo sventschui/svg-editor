@@ -42,16 +42,7 @@ export type Drawable = {
   stroke: string,
 };
 
-type Crop = {
-  x: number,
-  y: number,
-  height: number,
-  width: number,
-}
-
 type Props = {|
-  height: number,
-  width: number,
   canSelectDrawable: boolean,
   selectedDrawable?: ?string,
   onSelectDrawable: (id: ?string) => void,
@@ -75,24 +66,14 @@ type Props = {|
     newY: number,
   ) => void,
   drawables: Array<Drawable>,
-  defaultDiStrokeWidth?: number,
-  crop: ?Crop,
+  diStrokeWidth: number,
+  width: number,
+  height: number,
 |};
 
-type State = {
-  diStrokeWidth: ?number,
-};
 
-
-export default class Drawables extends PureComponent<Props, State> {
-  referenceRect: ?Element = null;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      diStrokeWidth: props.defaultDiStrokeWidth || 1,
-    };
-  }
+export default class Drawables extends PureComponent<Props> {
+  referenceRect: { current: null | Element } = React.createRef();
 
   componentDidMount() {
     window.addEventListener('keydown', this.onWindowKeyPress);
@@ -124,21 +105,12 @@ export default class Drawables extends PureComponent<Props, State> {
     }
   };
 
-  referenceRectRef = (el: ?Element) => {
-    this.referenceRect = el;
-
-    if (this.referenceRect) {
-      // TODO: calc this
-      this.setState({ diStrokeWidth: 5 });
-    }
-  };
-
   handleDragIndicatorMouseDown = (e: MouseEvent, id: string) => {
     if (!this.props.canSelectDrawable) {
       return;
     }
 
-    const { referenceRect } = this;
+    const { current: referenceRect } = this.referenceRect;
 
     if (!referenceRect) {
       console.error('referenceRect not available!'); // eslint-disable-line no-console
@@ -231,7 +203,7 @@ export default class Drawables extends PureComponent<Props, State> {
 
     e.stopPropagation();
 
-    const { referenceRect } = this;
+    const { current: referenceRect } = this.referenceRect;
 
     if (!referenceRect) {
       console.error('Reference rect not available!'); // eslint-disable-line no-console
@@ -245,7 +217,7 @@ export default class Drawables extends PureComponent<Props, State> {
       return;
     }
 
-    // $FlowFixMe flow doesn't know artboard is an SVGGraphicsElement
+    // $FlowFixMe
     const inverseMatrix = referenceRect.getScreenCTM().inverse();
 
     const transformPoint = ({ clientX, clientY }) => {
@@ -311,47 +283,24 @@ export default class Drawables extends PureComponent<Props, State> {
 
   render() {
     const {
-      height,
-      width,
       selectedDrawable,
-      crop,
+      diStrokeWidth,
+      canSelectDrawable,
+      width,
+      height,
     } = this.props;
-    const { diStrokeWidth } = this.state;
-
-    let vHeight = height;
-    let vWidth = width;
-    let vX = 0;
-    let vY = 0;
-
-    if (crop) {
-      const {
-        height: cropHeight,
-        width: cropWidth,
-        x,
-        y,
-      } = crop;
-
-      vHeight = cropHeight;
-      vWidth = cropWidth;
-      vX = x;
-      vY = y;
-    }
-
 
     return (
-      <g clipPath="url(#svg-editor-cut)">
-        {/* invisible rect to determine actual width/height and convert
-          stuff to viewBox coordinates */}
+      <g>
         <rect
-          x={`${vX}`}
-          y={`${vY}`}
-          width={`${vWidth}`}
-          height={`${vHeight}`}
-          ref={this.referenceRectRef}
+          ref={this.referenceRect}
+          x="0"
+          y="0"
+          width={`${width}`}
+          height={`${height}`}
           fill="none"
         />
-        {diStrokeWidth
-          && this.props.drawables
+        {this.props.drawables
           && this.props.drawables
             .sort(this.sortBySelected).map((item) => {
               switch (item.type) {
@@ -372,6 +321,7 @@ export default class Drawables extends PureComponent<Props, State> {
                       onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                       dragIndicatorStrokeWidth={diStrokeWidth}
                       onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                      canSelectDrawable={canSelectDrawable}
                     />
                   );
                 case 'line':
@@ -390,6 +340,7 @@ export default class Drawables extends PureComponent<Props, State> {
                       onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                       dragIndicatorStrokeWidth={diStrokeWidth}
                       onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                      canSelectDrawable={canSelectDrawable}
                     />
                   );
                 case 'path':
@@ -404,6 +355,7 @@ export default class Drawables extends PureComponent<Props, State> {
                       onSelect={this.handleDrawableSelect}
                       onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                       dragIndicatorStrokeWidth={diStrokeWidth}
+                      canSelectDrawable={canSelectDrawable}
                     />
                   );
                 case 'rect':
@@ -423,6 +375,7 @@ export default class Drawables extends PureComponent<Props, State> {
                       onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
                       dragIndicatorStrokeWidth={diStrokeWidth}
                       onResizeHandleMouseDown={this.handleResizeHandleMouseDown}
+                      canSelectDrawable={canSelectDrawable}
                     />
                   );
                 default:
