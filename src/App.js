@@ -408,7 +408,7 @@ export default class App extends PureComponent<{}, State> {
                           width={source.width}
                           height={source.height}
                           crop={crop}
-                          canTransformCrop={drawMode === 'crop' && !!crop}
+                          canTransformCrop={drawMode === 'crop'}
                           onResizeCrop={this.handleResizeCrop}
                           onCropTranslate={this.handleCropTranslate}
                           onRemoveCrop={this.handleRemoveCrop}

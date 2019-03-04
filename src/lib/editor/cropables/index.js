@@ -244,7 +244,7 @@ export default class Cropables extends PureComponent<Props> {
 
     return (
       <g
-        style={{ pointerEvents: 'none' }}
+        style={{ pointerEvents: canTransformCrop ? 'visiblePainted' : 'none' }}
       >
         <path
           d={`M0 0 H${width} V${height} H0 Z M${x} ${y} H${x + cropWidth} V${y + cropHeight} H${x} Z`}
