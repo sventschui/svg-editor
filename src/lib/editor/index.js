@@ -103,10 +103,10 @@ export default class Editor extends PureComponent<$Exact<Props>, State> {
   constructor(props: $Exact<Props>) {
     super(props);
     this.state = { heightRatio: 1 };
-    window.addEventListener('resize', this.recalcPixelRatio);
   }
 
   componentDidMount() {
+    window.addEventListener('resize', this.recalcPixelRatio);
     this.recalcPixelRatio();
   }
 
