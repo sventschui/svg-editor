@@ -15,6 +15,7 @@ type Props = {|
   diHeight: number,
   diStrokeWidth: number,
   selected: boolean,
+  animation?: boolean,
   diLeft?: number,
   diRight?: number,
   diTop?: number,
@@ -43,13 +44,17 @@ function inverseDirection(
 }
 
 export default class DragIndicator extends PureComponent<Props> {
-  makeDiStyles = memoize((selected: boolean, strokeWidth: number) => ({
+  static defaultProps = {
+    animation: true,
+  };
+
+  makeDiStyles = memoize((selected: boolean, strokeWidth: number, animation?: boolean) => ({
     pointerEvents: 'bounding-box',
     fill: 'none',
     stroke: selected ? '#999999' : 'none',
     strokeWidth,
     strokeDasharray: `${strokeWidth * 2} ${strokeWidth}`,
-    animation: 'dash 5s linear forwards infinite',
+    animation: animation ? 'dash 5s linear forwards infinite' : 'none',
     cursor: 'move',
     // TODO: make stroke dashed
   }));
@@ -82,6 +87,7 @@ export default class DragIndicator extends PureComponent<Props> {
       selected,
       inverseCursorHorizontal,
       inverseCursorVertical,
+      animation,
     } = this.props;
 
     const diStrokeWidthHalf = diStrokeWidth / 2;
@@ -94,7 +100,7 @@ export default class DragIndicator extends PureComponent<Props> {
     return (
       <g>
         <rect
-          style={this.makeDiStyles(selected, diStrokeWidth)}
+          style={this.makeDiStyles(selected, diStrokeWidth, animation)}
           x={diX}
           y={diY}
           width={diWidth}

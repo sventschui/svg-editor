@@ -3,7 +3,6 @@
 import React, { PureComponent, type Node } from 'react';
 import memoize from 'memoize-one';
 
-
 type Crop = {
   x: number,
   y: number,
