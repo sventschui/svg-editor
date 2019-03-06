@@ -42,6 +42,7 @@ export default class RectCrop extends PureComponent<Props> {
       >
         <DragIndicator
           id={id}
+          animation={false}
           onDragIndicatorMouseDown={this.handleDragIndicatorMouseDown}
           onResizeHandleTopLeftMouseDown={this.handleResizeHandleTopLeftMouseDown}
           onResizeHandleTopRightMouseDown={this.handleResizeHandleTopRightMouseDown}

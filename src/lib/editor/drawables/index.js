@@ -73,6 +73,12 @@ type Props = {|
 
 
 export default class Drawables extends PureComponent<Props> {
+  static defaultProps = {
+    // flow needs the prop to be required even it's not
+    // eslint-disable-next-line react/default-props-match-prop-types
+    canSelectDrawable: true,
+  };
+
   referenceRect: { current: null | Element } = React.createRef();
 
   componentDidMount() {
@@ -97,8 +103,10 @@ export default class Drawables extends PureComponent<Props> {
     ) {
       if (onRemoveDrawable) {
         if (event.key === 'Escape' || event.key === 'Esc') {
+          event.preventDefault();
           onSelectDrawable(null);
         } else if (event.key === 'Backspace' || event.key === 'Delete') {
+          event.preventDefault();
           onRemoveDrawable(selectedDrawable);
         }
       }

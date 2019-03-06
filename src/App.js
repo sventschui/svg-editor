@@ -394,7 +394,6 @@ export default class App extends PureComponent<{}, State> {
                           diStrokeWidth={5 * pixelRatio}
                           drawables={drawables}
                           onSelectDrawable={this.handleSelectDrawable}
-                          canSelectDrawable={drawMode !== null && drawMode !== 'crop'}
                           selectedDrawable={selectedDrawable}
                           onResizeDrawable={this.handleResizeDrawable}
                           onDrawableTranslate={this.handleDrawableTranslate}
