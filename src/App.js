@@ -211,7 +211,7 @@ export default class App extends PureComponent<{}, State> {
 
   pdfjs = async () => {
     const pdfjs = (await import('pdfjs-dist')).default;
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
     return pdfjs;
   }
 
@@ -301,6 +301,7 @@ export default class App extends PureComponent<{}, State> {
     return (
       <BackgroundSource source="/pdf-test.pdf" pdfjs={this.pdfjs} hqPdf>
         {(source) => {
+          console.log(source)
           if (source.state === 'LOADING') {
             return (<div>Loading...</div>);
           }

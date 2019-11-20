@@ -210,11 +210,11 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
     }
 
     return this.props.pdfjs()
-      .then(pdfjs => pdfjs.getDocument(URL.createObjectURL(blob))
+        .then(pdfJs => pdfJs.getDocument(URL.createObjectURL(blob)).promise
         // TODO: validate that there is only one page...
         .then(doc => doc.getPage(1))
         .then((page) => {
-          const viewport = page.getViewport(zoom, 0);
+          const viewport = page.getViewport({ scale: zoom, roation: 0});
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
@@ -226,7 +226,7 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
             viewport,
           };
 
-          return page.render(renderContext)
+          return page.render(renderContext).promise
             .then(() => {
               let png;
 
@@ -253,7 +253,6 @@ export default class GenericBackgroundSource extends PureComponent<Props, State>
   render() {
     const { children } = this.props;
     const { source } = this.state;
-
     return children(source);
   }
 }
