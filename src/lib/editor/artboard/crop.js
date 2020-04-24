@@ -105,7 +105,7 @@ export default class ArtboardCut extends PureComponent<Props, State> {
           <path
             d={`M0 0 H${width} V${height} H0 Z M${rectBounds.x} ${rectBounds.y} H${rectBounds.x + rectBounds.width} V${rectBounds.y + rectBounds.height} H${rectBounds.x} Z`}
             fillRule="evenodd"
-            fill="#00000070"
+            fill="rgba(0,0,0,0.7)"
           />
         )}
       </ArtboardBase>
