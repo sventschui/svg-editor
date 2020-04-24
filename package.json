@@ -1,6 +1,6 @@
 {
   "name": "@sventschui/react-svg-editor",
-  "version": "1.0.0-alpha.19",
+  "version": "1.0.0",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
