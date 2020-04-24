@@ -249,7 +249,7 @@ export default class Cropables extends PureComponent<Props> {
         <path
           d={`M0 0 H${width} V${height} H0 Z M${x} ${y} H${x + cropWidth} V${y + cropHeight} H${x} Z`}
           fillRule="evenodd"
-          fill="#00000085"
+          fill="rgba(0,0,0,0.5)"
         />
         <rect
           ref={this.referenceRectRef}

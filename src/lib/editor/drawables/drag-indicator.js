@@ -50,7 +50,7 @@ export default class DragIndicator extends PureComponent<Props> {
 
   makeDiStyles = memoize((selected: boolean, strokeWidth: number, animation?: boolean) => ({
     pointerEvents: 'bounding-box',
-    fill: 'none',
+    fill: 'transparent',
     stroke: selected ? '#999999' : 'none',
     strokeWidth,
     strokeDasharray: `${strokeWidth * 2} ${strokeWidth}`,
