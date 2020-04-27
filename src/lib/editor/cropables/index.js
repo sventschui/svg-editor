@@ -63,12 +63,14 @@ export default class Cropables extends PureComponent<Props> {
       && canTransformCrop
     ) {
       if (onConfirmCrop && event.key === 'Enter') {
+        event.preventDefault();
         onConfirmCrop();
       }
       if (onRemoveCrop && (event.key === 'Backspace'
         || event.key === 'Delete'
         || event.key === 'Escape'
         || event.key === 'Esc')) {
+        event.preventDefault();
         onRemoveCrop();
       }
     }
